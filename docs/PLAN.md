@@ -98,11 +98,12 @@ This is the feature that makes the cleaning/maintenance flow more than a bare "m
 
 ### Voice I/O (optional enhancement, not core MVP scope)
 
-Decision: **reasoning stays in Claude; Grok is voice I/O only**, not a second reasoning engine. Concretely:
+Decision: **browser-only voice, kept simple** — reasoning stays in Claude; Grok is voice I/O only, not a second reasoning engine, and there is no telephony (no real phone number to call). Concretely:
 
-- Guest speaks (browser mic) → audio streamed to **Grok STT** (streaming, ~$0.20/hr) → transcribed text fed into the *same* Claude Agent SDK pipeline used for typed chat — same tools, same A2UI generation, no separate logic path.
+- Guest speaks (browser mic, while on the concierge chat page) → audio streamed to **Grok STT** (streaming, ~$0.20/hr) → transcribed text fed into the *same* Claude tool-calling pipeline used for typed chat — same tools, same A2UI generation, no separate logic path.
 - Claude's text response → **Grok TTS** (~$15/1M characters) → streamed back as audio for playback.
-- This is a thin adapter in front of the existing chat pipeline (same pattern as the WebMCP idea from the earlier rent-runner plan — one core reasoning/tool layer, multiple thin channel adapters), not an architecture change.
+- Explicitly rejected: deploying Grok's own Voice Agent API (which has its own built-in reasoning + tool-calling, and integrates with LiveKit for real telephony) as a standalone voice agent that could also take real inbound phone calls. That's a materially bigger feature (SIP/PSTN bridge, a second independent reasoning/tool-calling implementation to keep behaviorally consistent with Claude's text-chat agent) and isn't needed right now — browser mic only.
+- **WebMCP is unrelated to this feature** — it only exists inside a browser tab and is designed for third-party/visitor-brought agents reaching into a page, not for our own first-party agent's tool-calling (voice or text). Our own agent, whichever channel it's serving, just calls the backend's tools directly.
 - Cost at this app's scale is low — a back-of-envelope 30 voice conversations/month at ~4 min each is a few dollars/month in STT+TTS, negligible relative to booking revenue.
 - New env var: an xAI API key. New UI surface: a mic-input affordance + audio playback on the guest concierge chat.
 - **Treat as a post-golden-path enhancement** — build the typed-chat golden path first (Phases 1-6), add voice I/O once that's solid, not as a Phase 0-6 blocker.
