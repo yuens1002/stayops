@@ -96,6 +96,17 @@ This is the feature that makes the cleaning/maintenance flow more than a bare "m
 - Tools: look up their own booking (unit, dates, house rules), answer FAQ/house-rules questions, **create a `work_order`** (e.g. "please send someone to fix the AC" → maintenance work order, `requested_by = guest_concierge`, template auto-assigned by type), flag a late-checkout request for owner review (not auto-approved), **browse and buy `addon_products`** at any point during the stay.
 - A2UI catalog components: `BookingSummaryCard`, `WorkOrderRequestConfirmation`, `AddonCatalogList`/`AddonCard` (browsable, "buy" button triggers Checkout inline in chat), chat bubbles.
 
+### Voice I/O (optional enhancement, not core MVP scope)
+
+Decision: **reasoning stays in Claude; Grok is voice I/O only**, not a second reasoning engine. Concretely:
+
+- Guest speaks (browser mic) → audio streamed to **Grok STT** (streaming, ~$0.20/hr) → transcribed text fed into the *same* Claude Agent SDK pipeline used for typed chat — same tools, same A2UI generation, no separate logic path.
+- Claude's text response → **Grok TTS** (~$15/1M characters) → streamed back as audio for playback.
+- This is a thin adapter in front of the existing chat pipeline (same pattern as the WebMCP idea from the earlier rent-runner plan — one core reasoning/tool layer, multiple thin channel adapters), not an architecture change.
+- Cost at this app's scale is low — a back-of-envelope 30 voice conversations/month at ~4 min each is a few dollars/month in STT+TTS, negligible relative to booking revenue.
+- New env var: an xAI API key. New UI surface: a mic-input affordance + audio playback on the guest concierge chat.
+- **Treat as a post-golden-path enhancement** — build the typed-chat golden path first (Phases 1-6), add voice I/O once that's solid, not as a Phase 0-6 blocker.
+
 ## À la carte guest services (add-ons, any time during the stay)
 
 No architecture change — reuses the existing single-account Stripe Checkout mechanism and the same chat/A2UI surface, just a second purchase path independent of the original booking charge:
