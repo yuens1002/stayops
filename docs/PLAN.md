@@ -12,12 +12,22 @@ The user explicitly wants this to double as market validation for the bigger OSS
 
 ## Stack
 
-- Next.js 16 App Router + TypeScript, **Pico.css** (lightweight, classless — carried over from the original OSS design, still the right fit for a chat-first SPA), deployed to Vercel.
+- Next.js 16 App Router + **React** + TypeScript, deployed to Vercel.
+- CSS/component library: **open — see "Open design decisions" below.** Pico.css was the original placeholder (lightweight, classless, chat-first-SPA rationale); Tailwind + shadcn/ui is also on the table now and worth weighing during the design pass before Phase 0 scaffolding.
 - **A2UI 1.0RC** for rendering the chat-driven UI — reuses the protocol/catalog/transport design already worked out for the OSS plan (envelope types, component catalog, SSE transport, Postgres-backed conversation/surface persistence), just running **in-process** in this one app instead of behind a separate `workflow-engine` service, since there's no one else's usage to meter or gate.
-- Claude Agent SDK called directly, in-app.
+- Reasoning engine integration: **open — see "Open design decisions" below.** Claude Agent SDK was the original placeholder; leaning toward the Vercel AI SDK (`streamText`/`generateText` + `tools`) instead, since the actual need is scoped tool-calling + multi-turn chat, not autonomous agent orchestration.
 - Neon Postgres + Drizzle — same reasoning as before (no query-engine binary in a Fluid Compute function, first-class `@neondatabase/serverless` support).
 - Clerk — single owner login (or a couple of named users with a `role` field if access gets shared later); no Organizations complexity needed.
 - Stripe — **plain single-account Checkout**, no Connect. The user is the one merchant collecting guest payments directly.
+- Voice I/O: Grok (xAI) for STT/TTS only, browser-only, no telephony — see the Guest concierge chat section below.
+
+## Open design decisions (revisit before Phase 0 scaffolding)
+
+Flagged during discussion, not yet locked in — the user is working through design details separately before implementation starts:
+
+1. **CSS/component library**: Pico.css (lightweight/classless, original rationale) vs. Tailwind + shadcn/ui (this session's usual default, more component control/design flexibility). React and Next.js are a given either way.
+2. **Reasoning engine**: Claude Agent SDK vs. Vercel AI SDK. Leaning AI SDK — Agent SDK is built for autonomous, coding-agent-shaped work (sub-agents, hooks, broad tool ecosystems); this app just needs scoped tool-calling (lookup booking, create work order, buy add-on) + multi-turn conversation + generative UI, which AI SDK covers directly and is the Vercel-native fit.
+3. **Model routing**: direct Anthropic SDK vs. **Vercel AI Gateway** (model-agnostic `"provider/model"` strings, e.g. `"anthropic/claude-sonnet-5"`, natively wired into the existing Vercel project) vs. OpenRouter (same model-agnostic idea, third-party account/key). Leaning Vercel AI Gateway since the whole stack is already Vercel-native — avoids adding another external dependency for the same benefit.
 
 ## Roles
 
