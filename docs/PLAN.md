@@ -108,15 +108,25 @@ This is the feature that makes the cleaning/maintenance flow more than a bare "m
 
 ### Voice I/O (optional enhancement, not core MVP scope)
 
-Decision: **browser-only voice, kept simple** — reasoning stays in Claude; Grok is voice I/O only, not a second reasoning engine, and there is no telephony (no real phone number to call). Concretely:
+Decision: **replace the hand-rolled STT/TTS stack with [Grok Voice Agent Builder](https://x.ai/voice-agent-builder)** — a no-code platform that bundles STT, LLM reasoning (Grok Voice), and TTS into one tightly-coupled pipeline. Every account includes a free phone number, so guests can call in addition to using the browser mic.
 
-- Guest speaks (browser mic, while on the concierge chat page) → audio streamed to **Grok STT** (streaming, ~$0.20/hr) → transcribed text fed into the *same* Claude tool-calling pipeline used for typed chat — same tools, same A2UI generation, no separate logic path.
-- Claude's text response → **Grok TTS** (~$15/1M characters) → streamed back as audio for playback.
-- Explicitly rejected: deploying Grok's own Voice Agent API (which has its own built-in reasoning + tool-calling, and integrates with LiveKit for real telephony) as a standalone voice agent that could also take real inbound phone calls. That's a materially bigger feature (SIP/PSTN bridge, a second independent reasoning/tool-calling implementation to keep behaviorally consistent with Claude's text-chat agent) and isn't needed right now — browser mic only.
-- **WebMCP is unrelated to this feature** — it only exists inside a browser tab and is designed for third-party/visitor-brought agents reaching into a page, not for our own first-party agent's tool-calling (voice or text). Our own agent, whichever channel it's serving, just calls the backend's tools directly.
-- Cost at this app's scale is low — a back-of-envelope 30 voice conversations/month at ~4 min each is a few dollars/month in STT+TTS, negligible relative to booking revenue.
-- New env var: an xAI API key. New UI surface: a mic-input affordance + audio playback on the guest concierge chat.
-- **Treat as a post-golden-path enhancement** — build the typed-chat golden path first (Phases 1-6), add voice I/O once that's solid, not as a Phase 0-6 blocker.
+Architecture:
+- Guest speaks (browser mic on the concierge page, or via the free inbound phone number) → **Grok Voice Agent Builder** handles STT + reasoning + TTS end-to-end, no separate audio wiring needed.
+- StayOps tools (look up booking, create work order, buy add-on) are exposed to the voice agent via **MCP server** — the same tool layer the text-chat Claude pipeline calls, just accessed through the MCP interface instead of direct in-process calls.
+- Text chat continues to use Claude (Vercel AI SDK); voice calls use Grok Voice. Two separate reasoning engines, unified at the tool/data layer via MCP.
+- Existing phone numbers, custom APIs, or additional MCP servers can be wired in as the product grows.
+
+Why this over hand-rolling Grok STT + Claude + Grok TTS:
+- Eliminates the STT → LLM → TTS latency hops across providers; Grok Voice is one tightly-coupled call.
+- No audio-streaming wiring to build or maintain (MediaRecorder, chunked uploads, playback buffering).
+- Real telephony comes for free — guests can call a number instead of requiring the browser tab to be open.
+- MCP integration means the voice agent and text agent share the same tool definitions without duplicating logic.
+
+Tradeoff: Grok Voice is the reasoning model for voice interactions, not Claude. For the guest concierge use case (FAQ, work order creation, add-on purchases) this is acceptable — the complexity ceiling is low. If voice reasoning quality becomes a concern post-MVP, the MCP boundary makes it possible to swap the voice platform without touching the tool layer.
+
+- **WebMCP is unrelated to this feature** — it only exists inside a browser tab and is designed for third-party/visitor-brought agents reaching into a page, not for our own first-party agent's tool-calling. Our own agent, whichever channel it's serving, calls tools directly (or via MCP for the voice path).
+- New env var: xAI API key (shared with Voice Agent Builder). New UI surface: a mic-input affordance + audio playback on the guest concierge chat; the free phone number is configured in the Voice Agent Builder dashboard, not in app code.
+- **Treat as a post-golden-path enhancement** — build the typed-chat golden path first (Phases 1-6), add voice once that's solid, not as a Phase 0-6 blocker.
 
 ## À la carte guest services (add-ons, any time during the stay)
 
