@@ -12,7 +12,9 @@
 import { loadEnvConfig } from "@next/env";
 
 // Runs outside Next, so load .env.local the way Next does (same pattern as
-// drizzle.config.ts / scripts/list-tables.ts) BEFORE any db import.
+// drizzle.config.ts / scripts/list-tables.ts). Static imports hoist above this
+// call, but none of the imported modules read env at module scope — the db
+// client below is created after env is loaded.
 loadEnvConfig(process.cwd());
 
 import { neon } from "@neondatabase/serverless";

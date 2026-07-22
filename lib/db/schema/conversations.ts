@@ -80,7 +80,9 @@ export const a2uiSurfaces = pgTable("a2ui_surfaces", {
     .notNull()
     .references(() => conversations.id, { onDelete: "cascade" }),
   components: jsonb("components").notNull(),
-  dataModel: jsonb("data_model"),
+  // Non-null to stay consistent with the frozen protocol's surfaceEnvelopeSchema
+  // (dataModel required) — persist {} when there are no keys.
+  dataModel: jsonb("data_model").notNull().default({}),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),

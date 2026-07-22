@@ -22,7 +22,12 @@ import { describe, expect, it } from "vitest";
   const previousNodeEnv = env.NODE_ENV;
   env.NODE_ENV = "development";
   loadEnvConfig(process.cwd());
-  env.NODE_ENV = previousNodeEnv;
+  if (previousNodeEnv === undefined) {
+    // Assigning undefined would coerce to the string "undefined" — delete instead.
+    delete env.NODE_ENV;
+  } else {
+    env.NODE_ENV = previousNodeEnv;
+  }
 }
 
 const databaseUrl = process.env.DATABASE_URL;

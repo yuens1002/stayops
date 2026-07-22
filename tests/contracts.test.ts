@@ -116,9 +116,12 @@ describe("fixture validation (every fixture validates)", () => {
 });
 
 describe("catalog rejection", () => {
-  const validComponent = componentsOf(fixtures[0].envelope)[0];
-
   it("rejects an unknown component type", () => {
+    expect(
+      fixtures.length,
+      "fixture files must be present for this suite to be meaningful",
+    ).toBeGreaterThan(0);
+    const validComponent = componentsOf(fixtures[0].envelope)[0];
     const unknown = { ...structuredClone(validComponent), type: "NotInCatalog" };
     expect(
       () => parseComponent(unknown),
