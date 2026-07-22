@@ -124,7 +124,9 @@ Three card sections, most recent first:
 5. Public-inquiry inbox: does replying to a public inquiry mint anything (lead record)? Not in the current data model.
 6. Reporting page — agent-answered only for v1 ("this month's numbers" in chat), or also a read-only page? Mocks assume agent-answered.
 
-## 10. Deltas vs. PLAN.md (need reconciliation)
+## 10. Deltas vs. PLAN.md
+
+> **Reconciled 2026-07-22** — the schema/status/audit rows below have been applied to PLAN.md (`routine_series`/`routine_visits`, `needs_revision`, `public_inquiry` subject type, `party_size`/`pets`, `tool_invocations`). The table is kept as the rationale record. The session-model row remains open design work for `lib/agent/session.ts` (Phase 1/4).
 
 | This spec | PLAN.md today | Action |
 |---|---|---|
