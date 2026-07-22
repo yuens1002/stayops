@@ -231,7 +231,7 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 *Verify: CRUD/invariant scripts, tool-call integration tests, test-mode Stripe run (`4242…`) — all headless, zero UI.*
 
 **Track F — frontend, owned by `/frontend-dev` (design system led by `/ux-architect`):**
-- F1 design system: owner spec §8 tokens (cream/terracotta, Montserrat/Crimson) → Tailwind theme; shadcn install + theming
+- F1 design system — **a first-class deliverable, not a token dump** (emphasized 2026-07-22): port the mocks' design language into a full custom shadcn theme — owner spec §8 tokens as Tailwind theme variables/CSS custom properties, shadcn primitives (Sheet/Dialog/Tabs/Card/Badge/Button) restyled to match the mocks' card/pill/divider conventions, and the Montserrat/Crimson/mono type scale. **Accent direction: leaning the green tone** (the §8 success-green family) over the mocks' terracotta — final call during the F1 theme pass, applied via theme variable so it's a one-line swap either way
 - F2 chat shell + A2UI renderer, rendering fixture envelopes
 - F3 catalog components against fixtures — guest cards, `WorkOrderChecklist` with the getUserMedia capture flow (against a stub upload endpoint), owner receipts/confirm cards
 - F4 owner FAB + sheet + receipt peek + read-only pages (Properties/Calendar/Jobs/Messages) with fixture data
