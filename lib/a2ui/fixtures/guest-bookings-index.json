@@ -1,0 +1,46 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-bookings-index",
+  "components": [
+    {
+      "id": "cmp-bookings-index",
+      "type": "BookingsIndexList",
+      "props": {
+        "title": "Your stays",
+        "stays": [
+          {
+            "bookingId": "bkg-2101",
+            "propertyName": "Harbor House",
+            "checkIn": "2026-07-20",
+            "checkOut": "2026-07-25",
+            "status": "checked_in"
+          },
+          {
+            "bookingId": "bkg-2102",
+            "propertyName": "Sunset Cabin",
+            "checkIn": "2026-08-14",
+            "checkOut": "2026-08-18",
+            "status": "upcoming"
+          }
+        ]
+      }
+    },
+    {
+      "id": "cmp-booking-summary-2102",
+      "type": "BookingSummaryCard",
+      "props": {
+        "bookingId": "bkg-2102",
+        "propertyName": "Sunset Cabin",
+        "coverPhotoUrl": "https://images.stayops.app/sunset-cabin/cover.jpg",
+        "status": "upcoming",
+        "checkIn": "2026-08-14",
+        "checkOut": "2026-08-18",
+        "guests": 2,
+        "totalCents": 74000
+      }
+    }
+  ],
+  "dataModel": {
+    "guestName": "Jordan"
+  }
+}

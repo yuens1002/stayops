@@ -1,0 +1,30 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-calendar",
+  "components": [
+    {
+      "id": "cmp-booking-calendar",
+      "type": "BookingCalendar",
+      "props": {
+        "unitId": "unit-sunset-cabin",
+        "month": "2026-08",
+        "nightlyRateCents": 18500,
+        "unavailableDates": [
+          "2026-08-07",
+          "2026-08-08",
+          "2026-08-21",
+          "2026-08-22",
+          "2026-08-23"
+        ],
+        "selectedRange": {
+          "checkIn": "2026-08-14",
+          "checkOut": "2026-08-18"
+        }
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2102",
+    "unitId": "unit-sunset-cabin"
+  }
+}

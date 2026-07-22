@@ -1,0 +1,22 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-wo-confirmation",
+  "components": [
+    {
+      "id": "cmp-wo-confirmation",
+      "type": "WorkOrderRequestConfirmation",
+      "props": {
+        "workOrderId": "wo-483",
+        "workOrderType": "maintenance",
+        "status": "requested",
+        "issue": "The AC is blowing warm air",
+        "unitLabel": "Unit 2B",
+        "message": "The owner's been notified and someone will be assigned shortly. I'll update you here."
+      }
+    }
+  ],
+  "dataModel": {
+    "workOrderId": "wo-483",
+    "bookingId": "bkg-2101"
+  }
+}

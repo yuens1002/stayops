@@ -1,0 +1,47 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-addon-catalog",
+  "components": [
+    {
+      "id": "cmp-addon-catalog",
+      "type": "AddonCatalogList",
+      "props": {
+        "title": "Add-ons for your stay",
+        "items": [
+          {
+            "addonProductId": "addon-firewood",
+            "name": "Firewood bundle",
+            "priceCents": 1800,
+            "thumbnailUrl": "https://images.stayops.app/addons/firewood-bundle.jpg",
+            "fulfillmentNote": "delivered by a contractor",
+            "purchased": false
+          },
+          {
+            "addonProductId": "addon-late-checkout",
+            "name": "Late checkout (until 2:00 PM)",
+            "priceCents": 2500,
+            "thumbnailUrl": "https://images.stayops.app/addons/late-checkout.jpg",
+            "fulfillmentNote": "flagged for owner review",
+            "purchased": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "cmp-addon-firewood",
+      "type": "AddonCard",
+      "props": {
+        "addonProductId": "addon-firewood",
+        "name": "Firewood bundle",
+        "priceCents": 1800,
+        "thumbnailUrl": "https://images.stayops.app/addons/firewood-bundle.jpg",
+        "fulfillmentNote": "delivered by a contractor",
+        "purchased": false,
+        "description": "A stacked bundle of seasoned birch for the fire pit — enough for two evenings. Delivered to the rack by the deck."
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2101"
+  }
+}

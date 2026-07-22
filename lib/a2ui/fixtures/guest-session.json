@@ -1,0 +1,20 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-session",
+  "components": [
+    {
+      "id": "cmp-guest-session",
+      "type": "GuestSessionCard",
+      "props": {
+        "conciergeUrl": "https://stayops.app/g/8f3k2",
+        "propertyName": "Harbor House",
+        "guestName": "Jordan",
+        "expiresAt": "2026-07-25",
+        "emailedTo": "jordan.meyer@example.com"
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2101"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-contractor-wo-card",
+  "components": [
+    {
+      "id": "cmp-wo-482",
+      "type": "WorkOrderCard",
+      "props": {
+        "workOrderId": "wo-482",
+        "title": "Turnover",
+        "workOrderType": "cleaning",
+        "status": "in_progress",
+        "pendingAcceptance": false,
+        "unitLabel": "Unit 2B",
+        "address": "18 Schooner Lane, Harborview, ME 04338",
+        "config": "3BR/2BA",
+        "dueBy": "2026-07-25T15:00:00Z",
+        "guests": 2,
+        "pets": false,
+        "rateCents": 8500,
+        "rateNote": "$85 on approval · paid outside the app"
+      }
+    },
+    {
+      "id": "cmp-wo-485",
+      "type": "WorkOrderCard",
+      "props": {
+        "workOrderId": "wo-485",
+        "title": "Turnover",
+        "workOrderType": "cleaning",
+        "status": "not_started",
+        "pendingAcceptance": true,
+        "unitLabel": "Sunset Cabin",
+        "address": "41 Ridgeline Road, Harborview, ME 04338",
+        "config": "2BR/1BA",
+        "dueBy": "2026-08-18T15:00:00Z",
+        "guests": 2,
+        "pets": true,
+        "rateCents": 9000,
+        "rateNote": "$90 on approval · paid outside the app"
+      }
+    }
+  ],
+  "dataModel": {
+    "contractorName": "Marisol",
+    "daySummary": "1 job today · Unit 2B at 11:00 AM · $85 on approval"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-owner-confirm",
+  "components": [
+    {
+      "id": "cmp-confirm-process-payment",
+      "type": "ConfirmCard",
+      "props": {
+        "toolName": "process_payment",
+        "summary": "Marisol · $85 · paid outside the app, marked here",
+        "confirmLabel": "Approve & pay",
+        "cancelLabel": "Cancel",
+        "amountCents": 8500,
+        "state": "pending"
+      }
+    }
+  ],
+  "dataModel": {
+    "workOrderId": "wo-481",
+    "contactName": "Marisol"
+  }
+}

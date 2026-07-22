@@ -1,0 +1,49 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-reservation",
+  "components": [
+    {
+      "id": "cmp-reservation-detail",
+      "type": "ReservationDetailCard",
+      "props": {
+        "bookingId": "bkg-2101",
+        "propertyName": "Harbor House",
+        "unitLabel": "Unit 2B",
+        "coverPhotoUrl": "https://images.stayops.app/harbor-house/unit-2b/cover.jpg",
+        "status": "checked_in",
+        "locationEyebrow": "Harborview, Maine",
+        "checkIn": "2026-07-20",
+        "checkOut": "2026-07-25",
+        "checkInTime": "4:00 PM",
+        "checkOutTime": "11:00 AM",
+        "guests": 2,
+        "totalCents": 110000,
+        "address": "18 Schooner Lane, Harborview, ME 04338",
+        "accessInfo": {
+          "locked": false,
+          "wifiNetwork": "HarborHouse-Guest",
+          "wifiPassword": "lobsterroll2026",
+          "doorCode": "4820#"
+        },
+        "photos": [
+          "https://images.stayops.app/harbor-house/unit-2b/living-room.jpg",
+          "https://images.stayops.app/harbor-house/unit-2b/kitchen.jpg",
+          "https://images.stayops.app/harbor-house/unit-2b/deck-view.jpg"
+        ],
+        "mapImageUrl": "https://images.stayops.app/harbor-house/map-approximate.png",
+        "houseRules": [
+          "No smoking anywhere on the property",
+          "Quiet hours after 10:00 PM",
+          "No parties or events",
+          "Pets welcome with prior approval",
+          "Check-out by 11:00 AM — start the dishwasher before you go"
+        ],
+        "houseManual": "Heat pump remote lives on the kitchen shelf — Auto mode keeps the whole unit comfortable. Spare linens are in the hall closet. Trash and recycling bins are behind the fence on the left; pickup is Tuesday morning."
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2101",
+    "reservationStatus": "checked_in"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-contractor-job-details",
+  "components": [
+    {
+      "id": "cmp-job-details-482",
+      "type": "JobDetailsCard",
+      "props": {
+        "workOrderId": "wo-482",
+        "unitLabel": "Unit 2B",
+        "doorCode": "4820#",
+        "parking": "Driveway on the left — leave the street spot for arriving guests",
+        "suppliesLocation": "Hall closet, top shelf (spare linens on the middle shelf)",
+        "notes": "Guests check out at 11:00 AM — text the owner if the unit isn't empty by 11:15."
+      }
+    }
+  ],
+  "dataModel": {
+    "workOrderId": "wo-482"
+  }
+}
