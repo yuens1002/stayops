@@ -103,11 +103,11 @@ Identical system to OWNER-SURFACE-SPEC.md §8 (cream/paper palette, terracotta a
 1. Expired/invalid/tampered token screen — no mock exists; needs a designed dead-end (re-request link via email?).
 2. Post-checkout grace: `past` state renders (guestbook) but the link "expires after checkout" — pick an expiry (checkout + N days?) and what's accessible then.
 3. Quick-action menu placement — logic exists, template shows only the single hero chip. Chips row? Dock menu?
-4. Cancel/date-change self-service: in v1 at all, or escalate-to-host only? Refund policy source of truth?
-5. Public inquiry → owner-inbox thread minting: what identifies the anonymous visitor (email prompt?), and does replying create a lead record (owner spec §9.5)?
+4. ~~Cancel/date-change self-service~~ — *resolved 2026-07-22: kept for v1.* Confirm cards; policy + refund rules from `units.cancellation_policy`; Stripe refund API.
+5. ~~Public inquiry → owner-inbox thread minting~~ — *mooted 2026-07-22: the entire public surface is deferred* (PLAN.md "Deferred research"); revisit with that research.
 6. Door code + Wi-Fi in a forwardable tokenized page — acceptable, or require a second factor (booking email) for the unlock block?
-7. Guestbook: v1 scope (media types, moderation) or cut entirely?
-8. Multi-stay "Your stays" index vs. one-token-per-booking (see §10).
+7. ~~Guestbook~~ — *resolved 2026-07-22: cut from v1.*
+8. ~~Multi-stay "Your stays" index~~ — *resolved 2026-07-22: per-booking scope stands* (`guest_sessions` per booking); index only if sessions ever key to guest email.
 
 ## 10. Deltas vs. PLAN.md
 

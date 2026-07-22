@@ -16,7 +16,7 @@ The user explicitly wants this to double as market validation for the bigger OSS
 - **Tailwind 4 + shadcn/ui** (locked 2026-07-22). The mocks were prototyped in Pico.css, but the owner spec's §8 visual language is fully custom (cream/terracotta palette, Montserrat/Crimson type) — which erodes Pico's classless advantage — and the owner surface needs bespoke primitives (FAB sheet, confirm cards, inbox tabs, timeline grid) that map directly onto shadcn's Sheet/Dialog/Tabs. Spec §8 tokens port to Tailwind theme variables.
 - **A2UI 1.0RC** for rendering the chat-driven UI — reuses the protocol/catalog/transport design already worked out for the OSS plan (envelope types, component catalog, SSE transport, Postgres-backed conversation/surface persistence), just running **in-process** in this one app instead of behind a separate `workflow-engine` service, since there's no one else's usage to meter or gate.
 - **Vercel AI SDK** (`streamText`/`generateText` + `tools`) as the reasoning-engine integration (locked 2026-07-22) — the need is scoped tool-calling + multi-turn chat + generative UI, not autonomous agent orchestration; Claude Agent SDK rejected as over-fitted to coding-agent-shaped work.
-- **Vercel AI Gateway** for model routing (locked 2026-07-22) — model-agnostic `"provider/model"` strings (e.g. `"anthropic/claude-sonnet-5"`), natively wired into the existing Vercel project; direct Anthropic SDK and OpenRouter rejected to avoid an extra external dependency for the same benefit.
+- **Vercel AI Gateway** for model routing (locked 2026-07-22) — model-agnostic `"provider/model"` strings (e.g. `"anthropic/<model-id>"`), natively wired into the existing Vercel project; direct Anthropic SDK and OpenRouter rejected to avoid an extra external dependency for the same benefit.
 - Neon Postgres + Drizzle — same reasoning as before (no query-engine binary in a Fluid Compute function, first-class `@neondatabase/serverless` support).
 - **Vercel Blob** for checklist photo evidence (and add-on/property images). Binary uploads never travel over the agent tool transport — the web app uploads and the agent receives a reference it passes into tool calls (all three surface specs carry this limitation).
 - Clerk — single owner login (or a couple of named users with a `role` field if access gets shared later); no Organizations complexity needed.
@@ -33,7 +33,7 @@ Per-surface design specs, extracted from the local design-session mocks, are the
 
 - `docs/OWNER-SURFACE-SPEC.md` — owner surface (agent-first, FAB-summoned sheet, read-only pages)
 - `docs/CONTRACTOR-SURFACE-SPEC.md` — contractor checklist/chat surface (tokenized, no account)
-- `docs/GUEST-SURFACE-SPEC.md` — guest concierge + public/pre-booking pages
+- `docs/GUEST-SURFACE-SPEC.md` — guest concierge surface (its public/pre-booking sections are **deferred-scope reference only** — the public surface is out of scope for v1, see "Explicitly out of scope")
 
 The mock HTML files under `docs/SPA chat interface design/` are **local-only working references, deliberately not committed** — anything an implementer needs from them must live in the specs.
 

@@ -27,11 +27,11 @@ Design tenets:
 
 ## 3. Session & token model
 
-- URL shape (mock): `stayops.app/wo/482-t7` — a `work_order_tokens` link minted when the owner assigns the job (PLAN.md). Mock auth note: *"Tokenized job link — no account needed. Expires when the job is closed."*
+- URL shape (mock): `stayops.app/wo/482-t7` — resolved 2026-07-22 as a **contact-scoped `contact_tokens` link** (replacing PLAN.md's earlier job-scoped `work_order_tokens`): the token identifies the contact and unlocks their whole book of work; job URLs are deep links within it. Mock auth note: *"Tokenized job link — no account needed. Expires when the job is closed."*
 - **Re-entry:** the link is valid for the life of the job, not single-use. Every open rehydrates conversation + checklist progress from the server; autosave (visible *"Saving… / ✓ All changes saved"* label) means nothing is lost between opens.
 - **Expiry is job-state-driven**, not purely clock-driven: the link stays live through `needs work` and dies when the job reaches `paid`/closed. A hard `expires_at` backstop remains for abandoned jobs. *(Inference — the mock states the behavior, not the mechanism.)*
 - **On `needs work`:** the same link re-opens with the checklist **editable again** and the owner's note pinned on the job (mock: *"Owner flagged: bathroom mirror still spotted — please redo before resubmitting"*), the job row action reading **"Fix & resubmit"**. Editable statuses in the mock: `not started`, `in progress`, `needs work`.
-- **Acceptance:** a newly assigned job appears as a preview row (status pill "New — preview") with an **Accept** button; accepting flips it to Accepted and assigns the WO number to the contractor's active list. *(Standalone mock only; see §10 — PLAN.md has no acceptance step.)*
+- **Acceptance:** a newly assigned job appears as a preview row (status pill "New — preview") with an **Accept** button; accepting flips it to Accepted and assigns the WO number to the contractor's active list. *(Kept for v1, decided 2026-07-22 — `accepted_at` in PLAN.md; no decline branch, a contractor who can't take the job messages the owner.)*
 - Expired/tampered token → rejected with a dead-link screen, never a silent partial view (PLAN.md verification #9). *(Not mocked; inference.)*
 
 ## 4. Tool surface (contractor agent)
@@ -90,12 +90,12 @@ Same system as **OWNER-SURFACE-SPEC.md §8** (cream/paper palette, Montserrat he
 
 ## 9. Open questions
 
-1. **Token scope:** the mock URL is per-work-order (`/wo/482-t7`) yet the surface shows the contractor's *whole* book of work (other WOs, routines, completed history). Does a job token resolve to its contact and unlock a contact-scoped view, or should v1 stay strictly job-scoped (PLAN.md's shape) with the Jobs list cut down?
-2. **Acceptance flow:** is Accept a real status transition (with timestamp, owner visibility) or mock flourish? What happens on decline/no response?
+1. ~~**Token scope**~~ — *resolved 2026-07-22: contact-scoped.* The token resolves to the contact and unlocks their book of work (`contact_tokens` in PLAN.md); job URLs deep-link within it.
+2. ~~**Acceptance flow**~~ — *resolved 2026-07-22: kept.* Accept is a real transition (`accepted_at`, owner-visible); no decline branch in v1 — the contractor messages the owner, who reassigns.
 3. **Voice input** in the contractor composer — mocked, but PLAN.md scopes voice to the guest concierge. Keep as post-MVP for contractors too?
 4. **Notification channel** for "you've been assigned / job flagged needs work" when the surface isn't open — ties to the SMS/Telegram-bridge reconsideration in project memory.
 5. **Photo storage/lifecycle** (Vercel Blob assumed), max photos per step, compression on capture.
-6. **Messages vs owner-readable agent chat** — two channels or one? The mock has both a direct owner thread and an owner-readable agent thread; the conversations model needs an explicit answer.
+6. ~~**Messages vs owner-readable agent chat**~~ — *resolved 2026-07-22: two channels.* `conversations.kind(agent_chat|direct)` in PLAN.md; the agent thread stays owner-readable, the direct thread is human-to-human.
 
 ## 10. Deltas vs. PLAN.md
 
