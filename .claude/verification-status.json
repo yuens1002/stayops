@@ -1,3 +1,11 @@
 {
-  "branches": {}
+  "branches": {
+    "feat/t1-contracts": {
+      "status": "pending",
+      "acs_total": 12,
+      "acs_passed": 0,
+      "plan": "docs/features/t1-contracts/plan.md",
+      "acs": "docs/features/t1-contracts/acs.md"
+    }
+  }
 }
