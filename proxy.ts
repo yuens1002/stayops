@@ -4,8 +4,10 @@ import { NextResponse } from "next/server";
 // Next 16 file convention: proxy.ts replaces the deprecated middleware.ts.
 // Clerk runs on every non-static request; route protection is opt-in per
 // route group ((app) is Clerk-gated, (public) is token-gated — see PLAN.md).
-// T0: pass through when Clerk keys aren't provisioned yet — remove gate at M1.
-export default process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+// T0: pass through when Clerk keys aren't fully provisioned (clerkMiddleware
+// needs the secret key as well) — remove gate at M1.
+export default process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+process.env.CLERK_SECRET_KEY
   ? clerkMiddleware()
   : () => NextResponse.next();
 

@@ -5,7 +5,7 @@ All notable changes to this project are documented here. Format follows [Keep a 
 ## [Unreleased]
 
 ### Added
-- **T0 verification complete** (2026-07-22): Clerk sign-in header on the landing page (`auth()`-branched, Clerk 7 pattern), `drizzle.config.ts` loads `.env.local` via `@next/env`; Neon `stayops` DB provisioned and `db:push` verified; Clerk modal verified against the provisioned app.
+- **T0 verification** (2026-07-22): Clerk sign-in header on the landing page (`auth()`-branched, Clerk 7 pattern), `drizzle.config.ts` loads `.env.local` via `@next/env`; Neon `stayops` DB provisioned and `db:push` verified; Clerk modal render verified against the provisioned app (full sign-in session pending owner credentials).
 - **T0 scaffold** (2026-07-22): Next.js 16 App Router + TypeScript, Tailwind 4 + shadcn/ui (radix/nova placeholder theme until F1), Clerk wired via `proxy.ts` (gated until keys provisioned), Drizzle + Neon HTTP driver with placeholder schema, `.env.example`, Vercel project linked with GitHub auto-deploys, agentic-workflow opt-in (`.claude/verification-status.json`, Gate 1 validator `scripts/check-acs-coverage.ts`, `docs/AGENTIC-WORKFLOW.md`).
 - Iteration 0 planning pass (2026-07-22): contractor + guest surface specs (`docs/CONTRACTOR-SURFACE-SPEC.md`, `docs/GUEST-SURFACE-SPEC.md`) extracted from the design mocks; Google Voice inbound channel section in `docs/PLAN.md`.
 - Initial repo scaffolding and architecture plan (`docs/PLAN.md`).

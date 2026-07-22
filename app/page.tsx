@@ -2,8 +2,11 @@ import { SignInButton, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function Home() {
-  // T0: header renders only when Clerk is configured (same gate as layout.tsx).
-  const clerkEnabled = !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
+  // T0: header renders only when Clerk is fully configured — auth() needs the
+  // secret key, so a publishable-only environment must not call it.
+  const clerkEnabled =
+    !!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY &&
+    !!process.env.CLERK_SECRET_KEY;
   const { userId } = clerkEnabled ? await auth() : { userId: null };
 
   return (
