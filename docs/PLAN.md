@@ -17,7 +17,7 @@ The user explicitly wants this to double as market validation for the bigger OSS
 - **A2UI 1.0RC** for rendering the chat-driven UI — reuses the protocol/catalog/transport design already worked out for the OSS plan (envelope types, component catalog, SSE transport, Postgres-backed conversation/surface persistence), just running **in-process** in this one app instead of behind a separate `workflow-engine` service, since there's no one else's usage to meter or gate.
 - **Vercel AI SDK** (`streamText`/`generateText` + `tools`) as the reasoning-engine integration (locked 2026-07-22) — the need is scoped tool-calling + multi-turn chat + generative UI, not autonomous agent orchestration; Claude Agent SDK rejected as over-fitted to coding-agent-shaped work.
 - **Vercel AI Gateway** for model routing (locked 2026-07-22) — model-agnostic `"provider/model"` strings (e.g. `"anthropic/<model-id>"`), natively wired into the existing Vercel project; direct Anthropic SDK and OpenRouter rejected to avoid an extra external dependency for the same benefit.
-- Neon Postgres + Drizzle — same reasoning as before (no query-engine binary in a Fluid Compute function, first-class `@neondatabase/serverless` support).
+- Neon Postgres + Drizzle — same reasoning as before (no query-engine binary in a Fluid Compute function, first-class `@neondatabase/serverless` support). Provisioned as a single project under the owner's **personal Neon account (`yuens1002`, Hobby plan), connected via the native Vercel↔Neon integration on the same Vercel account** — no new or team Neon account; branch usage budgeted within Hobby limits (see "Dev & verification environment").
 - **Vercel Blob** for checklist photo evidence (and add-on/property images). Binary uploads never travel over the agent tool transport — the web app uploads and the agent receives a reference it passes into tool calls (all three surface specs carry this limitation).
 - Clerk — single owner login (or a couple of named users with a `role` field if access gets shared later); no Organizations complexity needed.
 - Stripe — **plain single-account Checkout**, no Connect. The user is the one merchant collecting guest payments directly.
@@ -216,8 +216,8 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 
 ### Trunk (serial, small)
 
-- **T0 Scaffold** — Next.js + TS, Tailwind 4 + shadcn/ui, Clerk, Drizzle+Neon, Vercel link; agentic-workflow repo infra (`.claude/` gates, validators, templates). *Verify: app boots, sign-in works, `drizzle-kit push` connects, Gate 1 validator runs.*
-- **T1 Contracts (freeze)** — the FULL Drizzle schema (every table in the data model above), `lib/a2ui/protocol.ts` (envelope/SSE/action shapes, reused from the OSS plan's design), `lib/a2ui/catalog.ts` (every component named in the three surface specs, with Zod prop schemas), the upload-endpoint contract (route + response shape), and **fixture envelopes** (one JSON fixture per spec screen, validated against the Zod schemas). After T1 the catalog is **frozen** — any change is a deliberate contract PR visible to both tracks, not a drive-by edit. *Verify: types compile, schema pushes, every fixture validates.*
+- **T0 Scaffold** — Next.js + TS, Tailwind 4 + shadcn/ui, Clerk, Drizzle+Neon (provisioned per the stack note: `yuens1002` Hobby account via the Vercel integration), Vercel link, `.env.example` documenting every required var; agentic-workflow repo infra (`.claude/` gates, validators, templates). *Verify: app boots, sign-in works, `drizzle-kit push` connects, Gate 1 validator runs.*
+- **T1 Contracts (freeze)** — the FULL Drizzle schema (every table in the data model above), `lib/a2ui/protocol.ts` (envelope/SSE/action shapes, reused from the OSS plan's design), `lib/a2ui/catalog.ts` (every component named in the three surface specs, with Zod prop schemas), the upload-endpoint contract (route + response shape), and **fixture envelopes** (one JSON fixture per spec screen, validated against the Zod schemas). Also **`scripts/seed.ts`** — realistic demo state (2 properties, units, a mid-stay booking, work orders across every status, a routine series) so screenshots and reporting checks always run over believable data, and any Neon branch can be reset to baseline. After T1 the catalog is **frozen** — any change is a deliberate contract PR visible to both tracks, not a drive-by edit. *Verify: types compile, schema pushes, every fixture validates, seed runs clean twice (idempotent).*
 
 ### Parallel tracks (after T1; minimal cross-dependence by construction)
 
@@ -232,7 +232,7 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 
 **Track F — frontend, owned by `/frontend-dev` (design system led by `/ux-architect`):**
 - F1 design system — **a first-class deliverable, not a token dump** (emphasized 2026-07-22): port the mocks' design language into a full custom shadcn theme — owner spec §8 tokens as Tailwind theme variables/CSS custom properties, shadcn primitives (Sheet/Dialog/Tabs/Card/Badge/Button) restyled to match the mocks' card/pill/divider conventions, and the Montserrat/Crimson/mono type scale. **Accent direction: leaning the green tone** (the §8 success-green family) over the mocks' terracotta — final call during the F1 theme pass, applied via theme variable so it's a one-line swap either way
-- F2 chat shell + A2UI renderer, rendering fixture envelopes
+- F2 chat shell + A2UI renderer, rendering fixture envelopes; plus a **dev-only fixtures harness route** (`/dev/fixtures`, excluded from production builds) rendering every catalog component from its T1 fixtures — the screenshot-AC and visual-regression surface for the whole track
 - F3 catalog components against fixtures — guest cards, `WorkOrderChecklist` with the getUserMedia capture flow (against a stub upload endpoint), owner receipts/confirm cards
 - F4 owner FAB + sheet + receipt peek + read-only pages (Properties/Calendar/Jobs/Messages) with fixture data
 - F5 `(public)`/`(app)` shells with a stubbed session/token provider
@@ -250,6 +250,19 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 - **M5 Polish** — mobile-friendly pass (contractors and the owner live on phones), loading/empty/error states, keyboard-only pass.
 
 **Post-golden-path enhancements** (any order, after M3): voice I/O (Grok STT/TTS), the Google Voice channel.
+
+## Dev & verification environment
+
+How work gets validated with substantive evidence (the AC docs reference these methods):
+
+- **Local**: `next dev` on localhost. Visual ACs are verified by driving the app with browser automation and capturing named screenshots/GIFs that are **viewed in-conversation** — an agent's text description never passes a visual AC; the image itself is the evidence.
+- **Preview deploys**: every PR gets a Vercel preview URL (HTTPS). Mandatory for phone-only checks — the contractor **getUserMedia camera flow cannot be validated on desktop localhost**; it's confirmed on a real Android device against a preview URL before merge. Same route for judging the owner FAB/sheet feel on a real phone.
+- **Neon**: single project under the owner's **personal account (`yuens1002`, Hobby plan)**, connected through the **native Vercel↔Neon integration on the owner's Vercel account** so env vars sync automatically — never a separate or team Neon account. Branching: `main` (prod) + one long-lived `dev` branch; ephemeral per-PR branches only when a change needs isolated data, deleted after merge — Hobby-plan project/branch limits are the budget, so branches are spent deliberately.
+- **Stripe test mode**: test cards (`4242 4242 4242 4242`), `stripe listen --forward-to localhost:3000/api/stripe/webhook` so the full booking-confirm → guest-link-issuance chain runs end-to-end locally. Clerk dev-instance keys for auth.
+- **Seed data**: `scripts/seed.ts` (trunk T1) resets any branch to the realistic demo state — screenshots show real UI over real state, and reporting numbers can be checked against hand-computed totals.
+- **Fixtures harness**: `/dev/fixtures` (track F2) renders every A2UI catalog component from its frozen T1 fixtures — Track F produces screenshot evidence with zero backend, and the route doubles as the visual-regression surface later.
+- **Evidence rules** (enforced by the AC format + Gate 3): visual AC → named screenshot/GIF artifact; logic AC → code-review file ref; behavior AC → test-run output; E2E → numbered steps against seeded state. Track B evidence is headless by design — e.g. the submit-gate invariant (submitting with an incomplete required step must fail server-side) is a test run, not a screenshot.
+- `.env.example` (T0) documents every required var: Clerk, Neon, Stripe, Blob, AI Gateway — later xAI (voice) and Gmail OAuth (Google Voice channel).
 
 ## Explicitly out of scope for v1
 
