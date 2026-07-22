@@ -145,7 +145,7 @@ No architecture change — reuses the existing single-account Stripe Checkout me
 
 ## Explicitly out of scope for v1
 
-Multiple owners/multi-tenancy; a vendor marketplace or cross-instance shared-resource concept; automated payment to contractors (tracked as an expense only, gated on a completed prescribed report, not itself automated); SMS notifications (email only, or none, for v1); Stripe Connect of any kind; WebMCP (revisit only if this prototype validates enough to justify the bigger build); a public multi-property booking storefront (a simple internal/direct booking flow is enough at this scale).
+Multiple owners/multi-tenancy; a vendor marketplace or cross-instance shared-resource concept; automated payment to contractors (tracked as an expense only, gated on a completed prescribed report, not itself automated); SMS notifications (email only, or none, for v1); Stripe Connect of any kind; WebMCP (revisit only if this prototype validates enough to justify the bigger build); a public multi-property booking storefront (a simple internal/direct booking flow is enough at this scale); **TIDY's turnover-management MCP/API** (considered 2026-07-22 — full API access requires their paid Standard tier, $10-20/unit/mo, and it would outsource the prescribed-checklist/step-completion workflow that this app exists to validate as its own feature, not a vendor's).
 
 ## Verification plan
 
