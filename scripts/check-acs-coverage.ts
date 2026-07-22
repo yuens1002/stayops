@@ -22,13 +22,21 @@ const plan = readFileSync(planPath, "utf8");
 const acs = readFileSync(acsPath, "utf8");
 
 // Deliverables table rows: | D1 | ... | kind | /role |
+// Rows use a trailing pipe, so split() yields a final empty cell — drop it.
+const splitCells = (row: string) => {
+  const cells = row.split("|").map((c) => c.trim());
+  if (cells.at(-1) === "") cells.pop();
+  return cells;
+};
 const deliverableRows = [...plan.matchAll(/^\|\s*(D\d+)\s*\|(.+)$/gm)];
 const deliverables = new Map<string, string[]>(
-  deliverableRows.map((m) => [m[1], m[2].split("|").map((c) => c.trim())]),
+  deliverableRows.map((m) => [m[1], splitCells(m[2])]),
 );
 
 // AC rows: | AC-XX-1 | <plan ref> | <role> | ...
-const acRows = [...acs.matchAll(/^\|\s*(AC-[A-Z]+-\d+)\s*\|\s*([^|]+)\|/gm)];
+// Plan-ref cell may be empty ([^|]*) — matched so it can hard-fail below
+// instead of being silently skipped.
+const acRows = [...acs.matchAll(/^\|\s*(AC-[A-Z]+-\d+)\s*\|([^|]*)\|/gm)];
 
 const errors: string[] = [];
 
@@ -38,6 +46,10 @@ if (acRows.length === 0) errors.push(`no AC rows found in ${acsPath}`);
 const referenced = new Set<string>();
 for (const [, acId, refCell] of acRows) {
   const refs = refCell.trim();
+  if (!refs) {
+    errors.push(`${acId}: empty Plan ref cell`);
+    continue;
+  }
   if (refs === "—" || refs === "-") continue; // regression ACs are unscoped
   for (const ref of refs.split(/[,\s]+/).filter(Boolean)) {
     if (!deliverables.has(ref)) {
