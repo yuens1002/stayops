@@ -1,0 +1,23 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-house-rules",
+  "components": [
+    {
+      "id": "cmp-house-rules",
+      "type": "HouseRulesCard",
+      "props": {
+        "propertyName": "Harbor House",
+        "rules": [
+          "No smoking anywhere on the property",
+          "Quiet hours after 10:00 PM",
+          "No parties or events",
+          "Pets welcome with prior approval",
+          "Check-out by 11:00 AM — start the dishwasher before you go"
+        ]
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2101"
+  }
+}

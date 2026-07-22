@@ -1,0 +1,22 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-owner-receipt",
+  "components": [
+    {
+      "id": "cmp-receipt-create-job",
+      "type": "ToolReceipt",
+      "props": {
+        "toolInvocationId": "ti-9042",
+        "toolName": "create_job",
+        "status": "done",
+        "outcome": "WO #483 created",
+        "href": "/jobs/wo-483",
+        "timestamp": "2026-07-22T14:32:05Z"
+      }
+    }
+  ],
+  "dataModel": {
+    "toolInvocationId": "ti-9042",
+    "workOrderId": "wo-483"
+  }
+}

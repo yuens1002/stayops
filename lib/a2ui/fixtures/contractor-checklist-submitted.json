@@ -1,0 +1,91 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-contractor-checklist-submitted",
+  "components": [
+    {
+      "id": "cmp-checklist-481",
+      "type": "WorkOrderChecklist",
+      "props": {
+        "workOrderId": "wo-481",
+        "status": "submitted",
+        "areas": [
+          {
+            "name": "Kitchen",
+            "steps": [
+              {
+                "stepId": "step-tc-1",
+                "label": "Wipe counters, sink & appliances",
+                "completed": true,
+                "requiresPhoto": true,
+                "requiresNote": false,
+                "examplePhotoUrl": "https://images.stayops.app/templates/turnover/kitchen-counters-example.jpg",
+                "photoUrls": [
+                  "https://uploads.stayops.app/wo-481/step-tc-1/counters-01.jpg",
+                  "https://uploads.stayops.app/wo-481/step-tc-1/stove-02.jpg"
+                ]
+              },
+              {
+                "stepId": "step-tc-2",
+                "label": "Restock consumables",
+                "completed": true,
+                "requiresPhoto": false,
+                "requiresNote": false,
+                "photoUrls": [],
+                "stockItems": ["Soap", "Paper towels", "Trash bags"],
+                "stockLevels": {
+                  "Soap": "stocked",
+                  "Paper towels": "stocked",
+                  "Trash bags": "low"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Bath",
+            "steps": [
+              {
+                "stepId": "step-tc-3",
+                "label": "Clean shower, vanity & mirror",
+                "completed": true,
+                "requiresPhoto": true,
+                "requiresNote": false,
+                "examplePhotoUrl": "https://images.stayops.app/templates/turnover/bath-mirror-example.jpg",
+                "photoUrls": [
+                  "https://uploads.stayops.app/wo-481/step-tc-3/mirror-01.jpg"
+                ]
+              },
+              {
+                "stepId": "step-tc-4",
+                "label": "Replace towels & strip linens",
+                "completed": true,
+                "requiresPhoto": false,
+                "requiresNote": true,
+                "photoUrls": [],
+                "note": "All linens swapped — one pillowcase has a small tear, flagging for replacement"
+              }
+            ]
+          },
+          {
+            "name": "Exterior",
+            "steps": [
+              {
+                "stepId": "step-tc-5",
+                "label": "Sweep porch & restack firewood rack",
+                "completed": true,
+                "requiresPhoto": false,
+                "requiresNote": false,
+                "photoUrls": []
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dataModel": {
+    "workOrderId": "wo-481",
+    "stepsComplete": 5,
+    "stepsTotal": 5,
+    "submittedAt": "2026-07-21T18:42:00Z"
+  }
+}

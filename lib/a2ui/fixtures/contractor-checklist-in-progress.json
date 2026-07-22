@@ -1,0 +1,100 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-contractor-checklist-in-progress",
+  "components": [
+    {
+      "id": "cmp-checklist-482",
+      "type": "WorkOrderChecklist",
+      "props": {
+        "workOrderId": "wo-482",
+        "status": "in_progress",
+        "areas": [
+          {
+            "name": "Kitchen",
+            "steps": [
+              {
+                "stepId": "step-tc-1",
+                "label": "Wipe counters, sink & appliances",
+                "completed": true,
+                "requiresPhoto": true,
+                "requiresNote": false,
+                "examplePhotoUrl": "https://images.stayops.app/templates/turnover/kitchen-counters-example.jpg",
+                "photoUrls": [
+                  "https://uploads.stayops.app/wo-482/step-tc-1/counters-01.jpg"
+                ]
+              },
+              {
+                "stepId": "step-tc-2",
+                "label": "Restock consumables",
+                "completed": false,
+                "requiresPhoto": false,
+                "requiresNote": false,
+                "photoUrls": [],
+                "stockItems": ["Soap", "Paper towels", "Trash bags"],
+                "stockLevels": {
+                  "Soap": "stocked",
+                  "Paper towels": "low"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Bath",
+            "steps": [
+              {
+                "stepId": "step-tc-3",
+                "label": "Clean shower, vanity & mirror",
+                "completed": false,
+                "requiresPhoto": true,
+                "requiresNote": false,
+                "examplePhotoUrl": "https://images.stayops.app/templates/turnover/bath-mirror-example.jpg",
+                "photoUrls": []
+              },
+              {
+                "stepId": "step-tc-4",
+                "label": "Replace towels & strip linens",
+                "completed": true,
+                "requiresPhoto": false,
+                "requiresNote": true,
+                "photoUrls": [],
+                "note": "Left two extra beach towels in the hall closet"
+              }
+            ]
+          },
+          {
+            "name": "Exterior",
+            "steps": [
+              {
+                "stepId": "step-tc-5",
+                "label": "Sweep porch & restack firewood rack",
+                "completed": false,
+                "requiresPhoto": false,
+                "requiresNote": false,
+                "photoUrls": []
+              },
+              {
+                "stepId": "step-mnt-hvac",
+                "label": "Replace HVAC filter",
+                "completed": false,
+                "requiresPhoto": false,
+                "requiresNote": false,
+                "photoUrls": [],
+                "maintenance": {
+                  "cadence": "quarterly",
+                  "dueBy": "2026-07-24",
+                  "lastDoneAt": "2026-04-24"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "dataModel": {
+    "workOrderId": "wo-482",
+    "stepsComplete": 2,
+    "stepsTotal": 6,
+    "autosave": "saved"
+  }
+}

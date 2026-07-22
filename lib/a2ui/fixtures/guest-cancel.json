@@ -1,0 +1,21 @@
+{
+  "type": "surface",
+  "surfaceId": "sfc-guest-cancel",
+  "components": [
+    {
+      "id": "cmp-cancel-reservation",
+      "type": "CancelReservationCard",
+      "props": {
+        "bookingId": "bkg-2102",
+        "policySummary": "Free cancellation until 5 days before check-in (Aug 9). After that, the first night is non-refundable.",
+        "status": "active",
+        "refundAmountCents": 74000,
+        "refundMessage": "You'd receive a full refund of $740.00 to your original payment method."
+      }
+    }
+  ],
+  "dataModel": {
+    "bookingId": "bkg-2102",
+    "reservationStatus": "upcoming"
+  }
+}
