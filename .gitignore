@@ -26,3 +26,12 @@ drizzle/meta/
 # Misc
 .DS_Store
 *.log
+
+# Testing / build extras (from create-next-app)
+/coverage
+/out/
+*.tsbuildinfo
+next-env.d.ts
+*.pem
+
+.vercel
