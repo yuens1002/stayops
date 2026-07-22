@@ -1,11 +1,12 @@
-import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
+// Full StayOps domain schema (docs/PLAN.md "Data model") — trunk step T1.
+// Replaces the T0 `app_meta` placeholder (deliberately dropped: it only
+// proved the Drizzle → Neon push path).
 
-// T0 placeholder proving the Drizzle → Neon push path works. The full domain
-// schema (docs/PLAN.md "Data model") lands in trunk step T1.
-export const appMeta = pgTable("app_meta", {
-  key: text("key").primaryKey(),
-  value: text("value"),
-  updatedAt: timestamp("updated_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+export * from "./properties";
+export * from "./bookings";
+export * from "./contacts";
+export * from "./workflows";
+export * from "./routines";
+export * from "./commerce";
+export * from "./conversations";
+export * from "./audit";
