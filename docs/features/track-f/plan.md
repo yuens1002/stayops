@@ -7,7 +7,7 @@ Contracts (frozen, post-T1a): `lib/a2ui/catalog.ts` (12 components), `lib/a2ui/p
 ## Execution notes (for the orchestrating session)
 
 - Run via `/agentic-orca`. `.claude/agents/frontend-dev.md` exists (`agentType` works in a fresh session); create `.claude/agents/ux-architect.md` for D1 on first use, per the orca skill's build-on-first-run rule.
-- **D1 is a HUMAN CHECKPOINT**: the theme proposal renders the green accent vs. the mocks' terracotta side-by-side on real components — STOP after D1's proposal artifact and get the owner's pick before D3+ builds on the theme. (Owner's recorded leaning: green — `project_build_goal_t0_m5` memory.)
+- **D1 is a HUMAN CHECKPOINT**: the theme proposal renders the green accent vs. the mocks' terracotta side-by-side on real components — STOP after D1's proposal artifact and get the owner's pick before D3+ builds on the theme. (Recorded 2026-07-22: the owner leans toward the green accent — the checkpoint confirms or reverses that on rendered components.)
 - Waves: **W1** D1 (design system, checkpoint) + D2 (renderer + harness, theme-independent) → **W2** D3–D5 (components; need D1 pick + D2) → **W3** D6 (owner FAB/pages) + D7 (shells) → **W4** D8 (tests/screenshot ACs).
 - Effort: D1/D3 high; D2/D6 high; D4/D5/D7 medium; verify agents Opus/high. Screenshot ACs: images must be viewed in-conversation by the orchestrator (persona rule) — verify agents capture, the main thread confirms.
 - Mobile-first: guest + contractor components at 390px; owner pages responsive. Preview-deploy phone checks (getUserMedia) land at M2, not this track — the capture component ships against a stub here.
