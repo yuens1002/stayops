@@ -6,6 +6,8 @@
 
 ---
 
+> ⚠️ **2026-07-23 pivot — read before implementing.** Payments are out of v1 and bookings sync from third-party platforms (PLAN.md "Iteration-1 pivot" + "Booking ingestion"). The v1 guest surface is: **booking/lease + space info (24h access gate) + report-a-problem + host Messages**, with the concierge link **owner-issued**. Sections **§5.3 (add-ons), §5.4 (paid late checkout), §5.5 (cancel/date-change)** and the components `CheckoutCard`/`AddonCatalogList`/`AddonCard`/`CancelReservationCard`/`BookingCalendar`/`BookingsIndexList` are **deferred-scope reference only** — do not implement from them. §10 carries the full reconciliation record.
+
 ## 1. Vision
 
 The guest never installs an app or creates an account. Their booking confirmation mints **one tokenized concierge link, valid for the whole stay** — a mobile-first chat where an agent answers stay questions, files maintenance requests, and sells add-ons via inline Stripe Checkout, rendering every rich answer as an A2UI card in the stream. When the agent can't answer, a **real human (the host) is one tap away** in a separate Messages thread — the agent and the host are visibly distinct voices.
@@ -57,13 +59,13 @@ All calls are authorized server-side by the booking the token resolves to — th
 ### 5.2 Work-order request → confirmation
 Menu "Report a problem" (or matching free text) → agent asks what's wrong/urgency → guest describes ("The AC is blowing warm air") → agent: *"Got it — filing a maintenance request now."* → `WorkOrderRequestConfirmation` card: **Work Order #483 — Maintenance**, `Requested` pill, quoted issue text, unit, *"The owner's been notified and someone will be assigned shortly. I'll update you here."* Owner's surface simultaneously receives the event.
 
-### 5.3 Add-on browse / buy / receipt
+### 5.3 Add-on browse / buy / receipt — ⚠️ deferred (2026-07-23 pivot, see banner/§10)
 `AddonCatalogList` (*"Add-ons for your stay"*): rows of thumbnail · name · `$18 · delivered by a contractor` · **Buy**. Buy → user bubble ("Buy Firewood bundle") + `CheckoutCard`: line items, total, `Pay $18`, fine print *"Stripe Checkout (mock) — no real payment."* (production: real Checkout handoff, inline). Paid state → green `✓ Paid · $18` banner on the card, catalog row flips to `✓ Purchased`, agent confirms: *"Payment confirmed — firewood is on its way. A delivery work order was created."* Owner is notified of the purchase + auto-created WO.
 
-### 5.4 Late checkout / early check-in
+### 5.4 Late checkout / early check-in — ⚠️ paid flow deferred; survives as a request flag only (2026-07-23)
 Canonical mock: guest asks → agent quotes from house rules (*"late checkout is available until 2:00 PM… for $25. Add it to your bill?"*) → `CheckoutCard` → paid → *"booked, no approval needed. I've let your host know."* The earlier v1 mobile mock instead lists it as `$25 · flagged for owner review` — which matches PLAN.md. **Spec position: v1 ships the PLAN.md behavior (paid-or-free request → owner review flag); fully automated fulfillment is a per-product option to revisit** (§10).
 
-### 5.5 Cancel / change reservation
+### 5.5 Cancel / change reservation — ⚠️ deferred; platform owns booking mutations (2026-07-23)
 `CancelReservationCard`: policy summary (*"Free cancellation until 5 days before check-in…"*), **Keep reservation** / **Cancel reservation** buttons; cancelled state banner + refund message. Date changes reuse the `BookingCalendar` card. `BookingsIndexList` ("Your stays") lists multiple stays with status pills → `BookingSummaryCard` per stay.
 
 ### 5.6 Host Messages (human thread)
