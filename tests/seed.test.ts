@@ -1,7 +1,8 @@
 /**
- * T1 / D7 — seed invariants against the seeded dev DB (AC-TST-2).
+ * Seed invariants against the seeded dev DB — originally T1/D7 (AC-TST-2),
+ * amended by T1a/D4 (docs/features/t1a-contract-amendment/acs.md, AC-TST-1).
  *
- * Asserts the invariants named in docs/features/t1-contracts/acs.md: the
+ * Asserts the invariants named in the T1a ACs doc: the
  * `needs_revision` work order carries a non-empty `review_note`; the turnover
  * (cleaning) template prescribes >=1 `requires_photo` step and >=1 step with
  * `stock_items`; `comm_sync_state` carries per-source cursor rows; a lease + block are seeded.
