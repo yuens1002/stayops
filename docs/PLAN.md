@@ -30,7 +30,7 @@ The three decisions previously flagged as open are now closed (rationale recorde
 
 ## Iteration-1 pivot — 2026-07-23
 
-Re-scoped after T1 shipped: **(1) payments cut entirely** (no Stripe, no add-on commerce, no guest self-service cancel/date-change — the booking platforms own money and booking mutations); **(2) third-party booking ingestion becomes the core** (iCal + Gmail enrichment + manual booking/lease creation; turnover work orders auto-create/cancel from sync events); **(3) all agent chat-history features deferred** to a separate planning pass (sessions, auto-titling, cross-session resume, context-assembly design — v1 persists agent transcripts but ships no session features; human Messages threads unaffected). The frozen T1 contracts get a deliberate **contract-amendment PR** (schema + catalog) reflecting this — see Build order.
+Re-scoped after T1 shipped: **(1) payments cut entirely** (no Stripe, no add-on commerce, no guest self-service cancel/date-change — the booking platforms own money and booking mutations); **(2) third-party booking ingestion becomes the core** (**two-way iCal** — import feeds + a per-unit export feed; Gmail enrichment; manual booking/lease/block creation, owner-only mutations; turnover work orders auto-create/cancel from sync events); **(3) all agent chat-history features deferred** to a separate planning pass (sessions, auto-titling, cross-session resume, context-assembly design — v1 persists agent transcripts but ships no session features; human Messages threads unaffected). The frozen T1 contracts get a deliberate **contract-amendment PR** (schema + catalog) reflecting this — see Build order.
 
 ## Design references (surface specs are the contract)
 
@@ -56,17 +56,19 @@ Two shells, same pattern as the original plan: `(public)` (guest + contractor, t
 properties            id, name, address
 units                 id, property_id, label, unit_type(whole_property|adu|private_room|shared_room),
                       base_nightly_rate_cents, max_guests, house_rules, status,
-                      wifi_network?, wifi_password?, door_code?, house_manual?, cancellation_policy?
+                      wifi_network?, wifi_password?, door_code?, house_manual?, cancellation_policy?,
+                      ical_export_token unique
                       -- access info (wifi/door code/house manual) renders on the guest concierge but is
                       -- LOCKED until 24h before check-in (guest spec §3); cancellation_policy is
-                      -- informational copy only (cancellations happen on the booking platform)
+                      -- informational copy only (cancellations happen on the booking platform);
+                      -- ical_export_token is the rotatable capability token for the unit's export feed
 
 calendar_feeds        id, unit_id, platform(airbnb|furnished_finder|other), url, last_synced_at?,
                       last_hash?
-                      -- per-unit iCal feed URLs, polled by the ingestion cron (import-only in v1;
-                      -- no export feed — revisit if a unit ever double-lists across platforms)
+                      -- per-unit IMPORT feed URLs, polled by the ingestion cron. The EXPORT direction
+                      -- is per-unit: units.ical_export_token serves our own feed (see Booking ingestion)
 
-bookings              id, unit_id, kind(booking|lease), source(airbnb|furnished_finder|manual),
+bookings              id, unit_id, kind(booking|lease|block), source(airbnb|furnished_finder|manual),
                       external_ref? unique, confirmation_code?,
                       check_in, check_out, guest_name?, guest_email?, guest_phone?,
                       party_size?, pets bool default false,
@@ -76,7 +78,10 @@ bookings              id, unit_id, kind(booking|lease), source(airbnb|furnished_
                       -- idempotency key); guest fields are NULLABLE because feeds carry no contact
                       -- info — Airbnb email enrichment (matched via confirmation_code/dates/unit)
                       -- or the owner fills them in. amount_cents = payout (email-enriched or manual);
-                      -- monthly_rent_cents for kind=lease (Furnished Finder / direct mid-term).
+                      -- monthly_rent_cents for kind=lease (Furnished Finder / direct mid-term);
+                      -- kind=block = owner date-block (personal use/maintenance window): no guest,
+                      -- no turnover, exported to platforms via the unit's export feed. Blocks never
+                      -- auto-create work orders.
                       -- No payment columns — platforms collect money (2026-07-23 pivot).
                       -- party_size/pets surface on the owner calendar bars and contractor job context
 
@@ -208,7 +213,10 @@ Decision: **browser-only voice, kept simple** — reasoning stays in Claude; Gro
 
 The 2026-07-23 pivot's centerpiece: bookings are made and changed on third-party platforms; StayOps mirrors them and reacts.
 
-1. **iCal sync (dates/existence authority):** a Vercel Cron polls each `calendar_feeds` URL, upserting `bookings` keyed on the iCal event UID (`external_ref`). New event → booking created (`source` = platform) **and a turnover work order auto-created** for checkout day. Event gone or cancelled → booking `cancelled` and its unstarted auto-turnover cancelled (in-progress → flagged for owner review). Date changes update the booking and reschedule the unstarted turnover. Import-only — no export feed in v1.
+1. **iCal sync — two-way (decided 2026-07-23, superseding the same-day import-only call):**
+   - **Import (dates/existence authority):** a Vercel Cron polls each `calendar_feeds` URL, upserting `bookings` keyed on the iCal event UID (`external_ref`). New event → booking created (`source` = platform) **and a turnover work order auto-created** for checkout day. Event gone or cancelled → booking `cancelled` and its unstarted auto-turnover cancelled (in-progress → flagged for owner review). Date changes update the booking and reschedule the unstarted turnover.
+   - **Export (our feed, platforms subscribe):** each unit publishes a tokenized iCal URL (`GET /api/ical/[unit-export-token].ics`, capability URL — rotatable via `units.ical_export_token`) serving VEVENTs for every date-consuming row on that unit: manual bookings/leases, **owner date-blocks** (`kind=block` — personal use, maintenance windows; no guest, just dates), and platform-synced bookings (cross-blocking when a unit lists on more than one platform). The owner pastes this URL into each platform's external-calendar setting once.
+   - **Mutation authority:** only the **owner surface** writes calendar state in-app (manual bookings/leases/blocks + annotations); platform-synced bookings are read-only mirrors; guests and contractors never mutate the calendar. Outbound latency caveat: platforms poll subscribed feeds on their own schedule (hours, not minutes) — inbound latency is our cron's, outbound is theirs.
 2. **Airbnb email enrichment (guest details + revenue):** the same Gmail infrastructure planned for the Google Voice channel, promoted to v1: the cron also parses Airbnb booking-confirmation/cancellation emails (Gmail API, owner's account) and matches them to synced bookings via confirmation code/dates/unit — attaching `guest_name`/contact, `confirmation_code`, and payout → `amount_cents`. Best-effort parser (Airbnb can change formats); unmatched emails land in an owner-inbox review bucket. Idempotent on Gmail message id.
 3. **Manual booking/lease creation:** the owner agent creates `source=manual` rows directly — direct bookings and **mid-term leases** (`kind=lease`, `monthly_rent_cents`; the Furnished Finder arrangement, whose own feed still provides dates when available). Manual rows are the one kind the owner can edit in-app.
 
@@ -238,7 +246,7 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 ### Trunk (serial, small)
 
 - **T0 Scaffold** — Next.js + TS, Tailwind 4 + shadcn/ui, Clerk, Drizzle+Neon (provisioned per the stack note: `yuens1002` Hobby account via the Vercel integration), Vercel link, `.env.example` documenting every required var; agentic-workflow repo infra (`.claude/` gates, validators, templates). *Verify: app boots, sign-in works, `drizzle-kit push` connects, Gate 1 validator runs.*
-- **T1a Contract amendment (2026-07-23 pivot)** — the deliberate contract PR the freeze process exists for: schema — add `calendar_feeds`, rework `bookings` (kind/source/external_ref/confirmation_code, nullable guest fields, no payment columns, simplified status), drop `addon_products`/`addon_purchases`, generalize `comm_sync_state` to per-source cursors, `requested_by` gains `system`; catalog — remove `CheckoutCard`, `AddonCatalogList`, `AddonCard`, `CancelReservationCard` (+ their fixtures); re-freeze after merge. *Verify: db:push clean, full test suite green after amendment.*
+- **T1a Contract amendment (2026-07-23 pivot)** — the deliberate contract PR the freeze process exists for: schema — add `calendar_feeds`, rework `bookings` (kind incl. `block`/source/external_ref/confirmation_code, nullable guest fields, no payment columns, simplified status), `units.ical_export_token`, drop `addon_products`/`addon_purchases`, generalize `comm_sync_state` to per-source cursors, `requested_by` gains `system`; catalog — remove `CheckoutCard`, `AddonCatalogList`, `AddonCard`, `CancelReservationCard` (+ their fixtures); re-freeze after merge. *Verify: db:push clean, full test suite green after amendment.*
 - **T1 Contracts (freeze)** — DONE 2026-07-22 (PR #6). Was: the FULL Drizzle schema (every table in the data model above), `lib/a2ui/protocol.ts` (envelope/SSE/action shapes, reused from the OSS plan's design), `lib/a2ui/catalog.ts` (every component named in the three surface specs, with Zod prop schemas), the upload-endpoint contract (route + response shape), and **fixture envelopes** (one JSON fixture per spec screen, validated against the Zod schemas). Also **`scripts/seed.ts`** — realistic demo state (2 properties, units, a mid-stay booking, work orders across every status, a routine series) so screenshots and reporting checks always run over believable data, and any Neon branch can be reset to baseline. After T1 the catalog is **frozen** — any change is a deliberate contract PR visible to both tracks, not a drive-by edit. *Verify: types compile, schema pushes, every fixture validates, seed runs clean twice (idempotent).*
 
 ### Parallel tracks (after T1; minimal cross-dependence by construction)
@@ -246,7 +254,7 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 **Track B — backend, owned by `/backend-architect`:**
 - B1 service layer per table (CRUD + invariants — the submit-gate rule in `workOrderService` is the core)
 - B2 `lib/tokens.ts` (`guest_sessions` + `contact_tokens`) and server-side token resolution
-- B3 **booking ingestion** (replaces Stripe, 2026-07-23): iCal poll cron over `calendar_feeds` (UID upsert, cancellation/date-change detection), turnover work-order auto-create/cancel/reschedule, Airbnb email enrichment parser on the shared Gmail infra (OAuth + per-source cursors), manual booking/lease creation, owner-initiated guest-session issuance
+- B3 **booking ingestion + 2-way sync** (replaces Stripe, 2026-07-23): iCal poll cron over `calendar_feeds` (UID upsert, cancellation/date-change detection), turnover work-order auto-create/cancel/reschedule, **per-unit export feed endpoint** (`/api/ical/[unit-export-token].ics` — manual bookings/leases/blocks + cross-platform events), Airbnb email enrichment parser on the shared Gmail infra (OAuth + per-source cursors), manual booking/lease/block creation (owner-only mutations), owner-initiated guest-session issuance
 - B4 agent pipe: AI SDK + AI Gateway, per-surface toolsets (owner/guest/contractor), `tool_invocations` audit writes. Agent transcripts persist; **no session features** (B4a deferred)
 - ~~B4a context/session model~~ — **DEFERRED 2026-07-23** to a separate planning pass with all chat-history features (sessions, titling, resume, context-assembly design). v1: transcripts persist, context = current page + recent turns, nothing fancier
 - B5 SSE + action endpoints wired to the pipe; upload endpoint (Vercel Blob)
@@ -266,7 +274,7 @@ Restructured 2026-07-22 (from a strictly sequential phase list) to maximize conc
 
 ### Integration milestones (serial; each swaps fixtures/stubs for the real thing and is a golden-path gate)
 
-- **M1 Owner surface live** (needs Clerk only) — renderer switched from fixtures to real SSE; owner golden path: property/unit management, **live synced calendar (test iCal feed → bookings + auto-turnovers visible)**, manual booking/lease creation, jobs review, Messages, receipts, audit log, cold start proving state rehydrates from Postgres; **owner-surface live eval suite passing at threshold** (confirm-gating invariant included) is a merge gate.
+- **M1 Owner surface live** (needs Clerk only) — renderer switched from fixtures to real SSE; owner golden path: property/unit management, **live synced calendar (test iCal feed → bookings + auto-turnovers visible; export feed serving the unit's events)**, manual booking/lease/block creation, jobs review, Messages, receipts, audit log, cold start proving state rehydrates from Postgres; **owner-surface live eval suite passing at threshold** (confirm-gating invariant included) is a merge gate.
 - **M2 Contractor surface live** — contact token resolution, book-of-work views, Accept flow, full checklist round trip: photos (getUserMedia → Blob), submit gate, `needs_revision` fix + resubmit, owner approval.
 - **M3 Guest surface live** — owner attaches guest contact (or email enrichment provides it) and issues the concierge link; guest golden path: booking/lease lookup, space info with the 24h access-info gate, FAQ/rules, report-a-problem → work order, host Messages thread.
 - **M4 Reporting** — revenue/expense/occupancy per property/unit, date-range filtering, charts via the `dataviz` skill. *Verify: numbers match manually-computed totals.*
@@ -289,7 +297,7 @@ How work gets validated with substantive evidence (the AC docs reference these m
 
 ## Explicitly out of scope for v1
 
-Multiple owners/multi-tenancy; a vendor marketplace or cross-instance shared-resource concept; automated payment to contractors (tracked as an expense only, gated on a completed prescribed report, not itself automated); provider-based A2P SMS (a real provider registration is a later goal — the Twilio attempt stalled; the Google Voice channel above is the interim, and email remains the fallback); **all payment processing** (2026-07-23 pivot — Stripe removed entirely; platforms collect guest money); **add-on commerce** (`addon_products`/`addon_purchases` cut with payments); **guest self-service cancel/date-change** (kept 2026-07-22, **reversed 2026-07-23** — the booking platform owns booking mutations); **paid late checkout** (survives only as a request flag); **agent chat-history/session features** (deferred 2026-07-23 to a separate planning pass — transcripts persist, no sessions/titling/resume/context-assembly design); **iCal export** (import-only in v1); WebMCP (revisit only if this prototype validates enough to justify the bigger build); **any public/pre-booking surface** (deferred 2026-07-22 — bookings now arrive via platform sync or manual creation; see "Deferred research" below); **guestbook** (mocked, cut 2026-07-22); **reviews/ratings**; **extra-guest/pet fee pricing** (party_size + pets are recorded only); **TIDY's turnover-management MCP/API** (considered 2026-07-22 — full API access requires their paid Standard tier, $10-20/unit/mo, and it would outsource the prescribed-checklist/step-completion workflow that this app exists to validate as its own feature, not a vendor's).
+Multiple owners/multi-tenancy; a vendor marketplace or cross-instance shared-resource concept; automated payment to contractors (tracked as an expense only, gated on a completed prescribed report, not itself automated); provider-based A2P SMS (a real provider registration is a later goal — the Twilio attempt stalled; the Google Voice channel above is the interim, and email remains the fallback); **all payment processing** (2026-07-23 pivot — Stripe removed entirely; platforms collect guest money); **add-on commerce** (`addon_products`/`addon_purchases` cut with payments); **guest self-service cancel/date-change** (kept 2026-07-22, **reversed 2026-07-23** — the booking platform owns booking mutations); **paid late checkout** (survives only as a request flag); **agent chat-history/session features** (deferred 2026-07-23 to a separate planning pass — transcripts persist, no sessions/titling/resume/context-assembly design); WebMCP (revisit only if this prototype validates enough to justify the bigger build); **any public/pre-booking surface** (deferred 2026-07-22 — bookings now arrive via platform sync or manual creation; see "Deferred research" below); **guestbook** (mocked, cut 2026-07-22); **reviews/ratings**; **extra-guest/pet fee pricing** (party_size + pets are recorded only); **TIDY's turnover-management MCP/API** (considered 2026-07-22 — full API access requires their paid Standard tier, $10-20/unit/mo, and it would outsource the prescribed-checklist/step-completion workflow that this app exists to validate as its own feature, not a vendor's).
 
 ### Deferred research — before any public booking surface
 
@@ -305,9 +313,10 @@ A public, stranger-facing booking page is a different risk category from the cur
 6. Contractor opens the link (no login), sees the job as "New — preview", **accepts it**, works through the checklist via chat, uploads photos for the 2 required steps (in-page getUserMedia capture) → all steps complete → `status = submitted_for_review`.
 7. Owner reviews the submitted checklist (steps + photos + notes) in their own chat surface, approves → cost recorded, mirrored into `expenses`.
 8. A second feed booking is **cancelled** in the test feed → its booking flips to `cancelled` and its unstarted auto-turnover cancels with it.
-9. Owner manually creates a `kind=lease` booking (`source=manual`, `monthly_rent_cents`) for the second unit via their agent.
-10. Reporting for the property shows enriched + lease revenue against work-order expenses, and occupancy reflects synced nights.
-11. Tamper check: an expired or revoked contractor/guest token → rejected, not silently allowed.
+9. Owner manually creates a `kind=lease` booking (`source=manual`, `monthly_rent_cents`) for the second unit and a `kind=block` (personal use) on the first unit via their agent.
+10. **Export check:** fetching the unit's export feed URL returns valid iCal containing the manual lease, the block, and the synced platform booking — and rotating `ical_export_token` kills the old URL.
+11. Reporting for the property shows enriched + lease revenue against work-order expenses, and occupancy reflects synced nights.
+12. Tamper check: an expired or revoked contractor/guest token → rejected, not silently allowed.
 
 ## Critical files to start with
 

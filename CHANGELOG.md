@@ -15,6 +15,7 @@ All notable changes to this project are documented here. Format follows [Keep a 
 - No application code yet.
 
 ### Changed
+- **Two-way iCal sync** (2026-07-23, docs — supersedes same-day import-only call): per-unit tokenized export feed (`units.ical_export_token`) serving manual bookings/leases/blocks + cross-platform events back to the platforms; `bookings.kind` gains `block` (owner date-blocks, no turnover); calendar mutations are owner-surface-only. T1a amendment scope updated accordingly.
 - **Iteration-1 pivot** (2026-07-23, docs): payments/Stripe removed from v1 entirely; bookings now ingest from third-party platforms — per-unit iCal feeds (import-only, dates authority), Airbnb email enrichment via Gmail (guest details + payout), manual booking/lease creation; turnover work orders auto-create/cancel from sync events; add-on commerce and guest self-service cancel/date-change cut; agent chat-history/session features deferred to separate planning; guest concierge links owner-issued. T1 contract amendment (T1a) queued: `calendar_feeds`, bookings rework, commerce tables dropped, 4 catalog components removed.
 - `docs/PLAN.md`: added "Dev & verification environment" section (evidence rules, preview-deploy phone checks, Stripe test mode, Neon pinned to the owner's personal `yuens1002` Hobby account via the Vercel integration); named `scripts/seed.ts`, `/dev/fixtures` harness, and `.env.example` as T0/T1/F2 deliverables.
 - `docs/PLAN.md`: recorded TIDY's turnover-management MCP/API as considered and rejected for v1.
