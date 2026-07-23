@@ -41,6 +41,9 @@ export const workOrderStatusEnum = pgEnum("work_order_status", [
 export const workOrderRequestedByEnum = pgEnum("work_order_requested_by", [
   "owner",
   "guest_concierge",
+  // system: auto-created by calendar sync (turnovers on booking sync,
+  // cancelled with the platform booking — docs/PLAN.md "Booking ingestion").
+  "system",
 ]);
 
 // Per-item stock answer recorded by the contractor (contractor spec §5.2).

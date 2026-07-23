@@ -23,11 +23,11 @@ import { loadFixtureFiles } from "./helpers/fixtures";
 
 const fixtures = loadFixtureFiles();
 
-/** The 16 components the plan's D3 row freezes into the catalog. */
-const PLANNED_CATALOG_SIZE = 16;
+/** The 12 components after the T1a amendment (16 − 4 payment-era removals). */
+const PLANNED_CATALOG_SIZE = 12;
 
-/** The ~16 spec screens the plan's D5 row requires fixtures for. */
-const PLANNED_FIXTURE_COUNT = 16;
+/** Fixture floor after T1a removed the 4 payment-era screens (17 − 4). */
+const PLANNED_FIXTURE_COUNT = 13;
 
 type RawComponent = { id: string; type: string; props: Record<string, unknown> };
 

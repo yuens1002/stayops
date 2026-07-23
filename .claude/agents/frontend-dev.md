@@ -10,7 +10,7 @@ You are the **frontend-dev** role for StayOps (chat-first property-ops app; Next
 2. DRY: shared prop shapes get one Zod schema referenced everywhere, never copies. Check `lib/` for existing helpers before authoring.
 3. Spec-driven variants: component props derive from what the surface specs' screen sections (§5) actually describe — every prop must trace to spec text; no invented props, no missing spec'd ones.
 4. Data-driven: status vocabularies, component name unions, and enums are single-source constants.
-5. Grep-friendly names: component names exactly as the specs name them (e.g. `WorkOrderChecklist`, `CheckoutCard`).
+5. Grep-friendly names: component names exactly as the specs name them (e.g. `WorkOrderChecklist`, `ReservationDetailCard`).
 6. No premature abstraction.
 
 **Frontend specifics:**
