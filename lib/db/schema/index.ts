@@ -4,6 +4,7 @@
 
 export * from "./properties";
 export * from "./bookings";
+export * from "./calendar";
 export * from "./contacts";
 export * from "./workflows";
 export * from "./routines";

@@ -6,6 +6,13 @@
       "acs_passed": 12,
       "plan": "docs/features/t1-contracts/plan.md",
       "acs": "docs/features/t1-contracts/acs.md"
+    },
+    "feat/t1a-contract-amendment": {
+      "status": "verified",
+      "acs_total": 8,
+      "acs_passed": 8,
+      "plan": "docs/features/t1a-contract-amendment/plan.md",
+      "acs": "docs/features/t1a-contract-amendment/acs.md"
     }
   }
 }

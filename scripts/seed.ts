@@ -24,9 +24,8 @@ import type { PgTable } from "drizzle-orm/pg-core";
 
 import * as schema from "../lib/db/schema";
 import {
-  addonProducts,
   bookings,
-  COMM_SYNC_STATE_SINGLETON_ID,
+  calendarFeeds,
   commSyncState,
   contacts,
   expenses,
@@ -75,6 +74,9 @@ const ID = {
   stepExterior: seedUuid(45),
   bookingMidStay: seedUuid(51),
   bookingUpcoming: seedUuid(52),
+  bookingLease: seedUuid(53),
+  bookingBlock: seedUuid(54),
+  feedMainCabinAirbnb: seedUuid(55),
   woRequested: seedUuid(61),
   woAssigned: seedUuid(62),
   woInProgress: seedUuid(63),
@@ -86,8 +88,6 @@ const ID = {
   routineVisit1: seedUuid(72),
   routineVisit2: seedUuid(73),
   maintenanceHvacFilter: seedUuid(81),
-  addonFirewood: seedUuid(91),
-  addonLateCheckout: seedUuid(92),
   expenseHvacRepair: seedUuid(101),
   expenseTurnoverClean: seedUuid(102),
   expenseInsurance: seedUuid(103),
@@ -327,6 +327,10 @@ async function main() {
       {
         id: ID.bookingMidStay,
         unitId: ID.unitMainCabin,
+        kind: "booking" as const,
+        source: "airbnb" as const,
+        externalRef: "airbnb-HMABC1234X@airbnb.com",
+        confirmationCode: "HMABC1234X",
         checkIn: midStayCheckIn,
         checkOut: midStayCheckOut,
         guestName: "Priya Raman",
@@ -341,6 +345,10 @@ async function main() {
       {
         id: ID.bookingUpcoming,
         unitId: ID.unitBungalow,
+        kind: "booking" as const,
+        source: "airbnb" as const,
+        externalRef: "airbnb-HMDEF5678Y@airbnb.com",
+        confirmationCode: "HMDEF5678Y",
         checkIn: upcomingCheckIn,
         checkOut: upcomingCheckOut,
         guestName: "Tom Ellery",
@@ -351,6 +359,31 @@ async function main() {
         status: "confirmed",
         amountCents:
           nights(upcomingCheckIn, upcomingCheckOut) * BUNGALOW_RATE_CENTS,
+      },
+      {
+        // Mid-term lease (Furnished Finder / direct) — monthly rent, manual.
+        id: ID.bookingLease,
+        unitId: ID.unitCreeksideAdu,
+        kind: "lease" as const,
+        source: "manual" as const,
+        checkIn: daysFromNow(-20, CHECK_IN_HOUR),
+        checkOut: daysFromNow(70, CHECK_OUT_HOUR),
+        guestName: "Dana Whitfield",
+        guestEmail: "dana.whitfield@example.com",
+        partySize: 1,
+        pets: false,
+        status: "confirmed" as const,
+        monthlyRentCents: 245000,
+      },
+      {
+        // Owner date-block (personal use) — no guest, no auto-turnover.
+        id: ID.bookingBlock,
+        unitId: ID.unitMainCabin,
+        kind: "block" as const,
+        source: "manual" as const,
+        checkIn: daysFromNow(14, CHECK_IN_HOUR),
+        checkOut: daysFromNow(17, CHECK_OUT_HOUR),
+        status: "confirmed" as const,
       },
     ])
     .onConflictDoUpdate({
@@ -521,32 +554,6 @@ async function main() {
       set: conflictUpdateAllExcept(maintenanceSchedules, ["id", "createdAt"]),
     });
 
-  // --- addon products (firewood -> work_order, late checkout -> none) ------
-  await db
-    .insert(addonProducts)
-    .values([
-      {
-        id: ID.addonFirewood,
-        unitId: ID.unitMainCabin,
-        name: "Firewood bundle",
-        description: "Seasoned firewood delivered and stacked by the fire pit.",
-        priceCents: 3500,
-        fulfillmentType: "work_order",
-      },
-      {
-        id: ID.addonLateCheckout,
-        unitId: null, // available at any unit
-        name: "Late checkout (1pm)",
-        description: "Check out at 1pm instead of 11am, subject to turnover schedule.",
-        priceCents: 4500,
-        fulfillmentType: "none",
-      },
-    ])
-    .onConflictDoUpdate({
-      target: addonProducts.id,
-      set: conflictUpdateAllExcept(addonProducts, ["id", "createdAt"]),
-    });
-
   // --- expenses (work-order costs + a non-work-order cost) -----------------
   await db
     .insert(expenses)
@@ -587,20 +594,36 @@ async function main() {
       set: conflictUpdateAllExcept(expenses, ["id"]),
     });
 
-  // --- comm_sync_state singleton -------------------------------------------
+  // --- calendar feeds: per-unit import URLs (test feed until real ones land)
+  await db
+    .insert(calendarFeeds)
+    .values([
+      {
+        id: ID.feedMainCabinAirbnb,
+        unitId: ID.unitMainCabin,
+        platform: "airbnb" as const,
+        url: "https://www.airbnb.com/calendar/ical/00000001.ics?s=seedfixture",
+      },
+    ])
+    .onConflictDoUpdate({
+      target: calendarFeeds.id,
+      set: conflictUpdateAllExcept(calendarFeeds, ["id", "createdAt"]),
+    });
+
+  // --- comm_sync_state: per-source cursors (2026-07-23 pivot) --------------
   // DoNothing, not DoUpdate: never clobber a live Gmail poll cursor.
   await db
     .insert(commSyncState)
-    .values([{ id: COMM_SYNC_STATE_SINGLETON_ID }])
+    .values([{ id: "airbnb_email" as const }])
     .onConflictDoNothing({ target: commSyncState.id });
 
   console.log("Seed complete:");
   console.log("  properties: 2, units: 3, contacts: 2");
   console.log("  workflow template: 1 (Standard Turnover Clean, 5 steps)");
-  console.log("  bookings: 2 (mid-stay + upcoming)");
+  console.log("  bookings: 4 (mid-stay + upcoming + lease + block)");
   console.log("  work orders: 7 (every status incl. needs_revision)");
   console.log("  routine series: 1 (+2 visits), maintenance schedules: 1");
-  console.log("  addon products: 2, expenses: 3, comm_sync_state: singleton");
+  console.log("  calendar feeds: 1, expenses: 3, comm_sync_state: airbnb_email cursor");
 }
 
 main().catch((err) => {

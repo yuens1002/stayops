@@ -1,10 +1,11 @@
 /**
- * T1 / D7 — seed invariants against the seeded dev DB (AC-TST-2).
+ * Seed invariants against the seeded dev DB — originally T1/D7 (AC-TST-2),
+ * amended by T1a/D4 (docs/features/t1a-contract-amendment/acs.md, AC-TST-1).
  *
- * Asserts the invariants named in docs/features/t1-contracts/acs.md: the
+ * Asserts the invariants named in the T1a ACs doc: the
  * `needs_revision` work order carries a non-empty `review_note`; the turnover
  * (cleaning) template prescribes >=1 `requires_photo` step and >=1 step with
- * `stock_items`; `comm_sync_state` is a singleton.
+ * `stock_items`; `comm_sync_state` carries per-source cursor rows; a lease + block are seeded.
  *
  * Runs against the same `.env.local` the app uses (loaded via `@next/env`,
  * same pattern as drizzle.config.ts / scripts/seed.ts). Skips with a clear
@@ -131,7 +132,7 @@ describeDb("seed invariants (seeded dev DB)", () => {
   );
 
   it(
-    "comm_sync_state is a singleton",
+    "comm_sync_state carries the airbnb_email cursor row (per-source keys only)",
     { timeout: DB_TEST_TIMEOUT_MS },
     async () => {
       const { db, schema } = await getDb();
@@ -139,14 +140,32 @@ describeDb("seed invariants (seeded dev DB)", () => {
         .select({ id: schema.commSyncState.id })
         .from(schema.commSyncState);
 
+      const ids = rows.map((r) => r.id);
       expect(
-        rows.length,
-        "comm_sync_state must contain exactly one row (the Gmail poll-cursor singleton)",
-      ).toBe(1);
-      expect(
-        rows[0].id,
-        "the comm_sync_state row must use the singleton id",
-      ).toBe(schema.COMM_SYNC_STATE_SINGLETON_ID);
+        ids,
+        "the v1 ingestion source 'airbnb_email' must have a cursor row",
+      ).toContain("airbnb_email");
+      for (const id of ids) {
+        expect(
+          schema.COMM_SYNC_SOURCES,
+          `comm_sync_state row '${id}' must use a known source key`,
+        ).toContain(id);
+      }
+    },
+  );
+
+  it(
+    "seed covers a lease and an owner date-block",
+    { timeout: DB_TEST_TIMEOUT_MS },
+    async () => {
+      const { db, schema } = await getDb();
+      const rows = await db
+        .select({ kind: schema.bookings.kind })
+        .from(schema.bookings);
+
+      const kinds = rows.map((r) => r.kind);
+      expect(kinds, "a kind=lease booking must be seeded").toContain("lease");
+      expect(kinds, "a kind=block date-block must be seeded").toContain("block");
     },
   );
 });

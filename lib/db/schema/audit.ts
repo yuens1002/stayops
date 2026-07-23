@@ -1,6 +1,4 @@
 import {
-  check,
-  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -8,7 +6,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
 
 // docs/PLAN.md "Data model" — tool_invocations / comm_sync_state.
 
@@ -34,24 +31,15 @@ export const toolInvocations = pgTable("tool_invocations", {
     .defaultNow(),
 });
 
-export const COMM_SYNC_STATE_SINGLETON_ID = 1;
+// Gmail ingestion sources, one cursor row each (2026-07-23 pivot — was a
+// singleton): airbnb_email is v1 (booking enrichment), gv is post-golden-path
+// (Google Voice SMS/voicemail).
+export const COMM_SYNC_SOURCES = ["airbnb_email", "gv"] as const;
+export type CommSyncSource = (typeof COMM_SYNC_SOURCES)[number];
 
-// Singleton row: poll cursor for the Google Voice / Gmail ingestion cron.
-export const commSyncState = pgTable(
-  "comm_sync_state",
-  {
-    id: integer("id")
-      .primaryKey()
-      .default(COMM_SYNC_STATE_SINGLETON_ID),
-    gmailHistoryCursor: text("gmail_history_cursor"),
-    lastPolledAt: timestamp("last_polled_at", { withTimezone: true }),
-  },
-  (t) => [
-    // Enforce the singleton at the DB layer. sql.raw: DDL can't take bound
-    // parameters, so the constant must be inlined into the check expression.
-    check(
-      "comm_sync_state_singleton",
-      sql`${t.id} = ${sql.raw(String(COMM_SYNC_STATE_SINGLETON_ID))}`,
-    ),
-  ],
-);
+export const commSyncState = pgTable("comm_sync_state", {
+  // Source key, e.g. 'airbnb_email'.
+  id: text("id").primaryKey().$type<CommSyncSource>(),
+  gmailHistoryCursor: text("gmail_history_cursor"),
+  lastPolledAt: timestamp("last_polled_at", { withTimezone: true }),
+});

@@ -53,15 +53,6 @@ export const MAINTENANCE_CADENCES = [
 ] as const;
 export type MaintenanceCadence = (typeof MAINTENANCE_CADENCES)[number];
 
-/** CheckoutCard payment states (guest spec §5.3: pending → green "✓ Paid" banner). */
-export const CHECKOUT_STATUSES = ["pending", "paid"] as const;
-export type CheckoutStatus = (typeof CHECKOUT_STATUSES)[number];
-
-/** Guest-facing cancel-card states (guest spec §5.5: confirm → cancelled banner). */
-export const CANCEL_RESERVATION_STATUSES = ["active", "cancelled"] as const;
-export type CancelReservationStatus =
-  (typeof CANCEL_RESERVATION_STATUSES)[number];
-
 /**
  * ConfirmCard lifecycle (owner spec §3.2: pending cards expire with their
  * session and render inert with a "re-ask to renew" hint).
@@ -82,20 +73,6 @@ const entityId = z.string().min(1);
 const cents = z.number().int().nonnegative();
 const isoDate = z.iso.date();
 const isoDateTime = z.iso.datetime();
-
-/**
- * One add-on row (guest spec §5.3: thumbnail · name · "$18 · delivered by a
- * contractor" · Buy; purchased rows flip to "✓ Purchased").
- */
-const addonItem = z.strictObject({
-  addonProductId: entityId,
-  name: z.string().min(1),
-  priceCents: cents,
-  thumbnailUrl: z.url().optional(),
-  /** e.g. "delivered by a contractor" (fulfillment_type=work_order add-ons). */
-  fulfillmentNote: z.string().optional(),
-  purchased: z.boolean().default(false),
-});
 
 // ---------------------------------------------------------------------------
 // Guest components (guest spec §5, §8; PLAN.md "Guest concierge chat")
@@ -202,62 +179,6 @@ export const workOrderRequestConfirmationProps = z.strictObject({
 });
 export type WorkOrderRequestConfirmationProps = z.infer<
   typeof workOrderRequestConfirmationProps
->;
-
-/** Add-on catalog rows (guest spec §5.3: "Add-ons for your stay"). */
-export const addonCatalogListProps = z.strictObject({
-  /** Renderer defaults to "Add-ons for your stay". */
-  title: z.string().optional(),
-  items: z.array(addonItem).min(1),
-});
-export type AddonCatalogListProps = z.infer<typeof addonCatalogListProps>;
-
-/** Single browsable add-on with a Buy action (PLAN.md guest catalog list). */
-export const addonCardProps = addonItem.extend({
-  description: z.string().optional(),
-});
-export type AddonCardProps = z.infer<typeof addonCardProps>;
-
-/**
- * Inline payment card (guest spec §1.3, §5.3): line items, total, explicit
- * "Pay $N" tap as the confirmation, fine print; paid state renders the green
- * "✓ Paid · $N" banner.
- */
-export const checkoutCardProps = z.strictObject({
-  lineItems: z
-    .array(
-      z.strictObject({
-        label: z.string().min(1),
-        amountCents: cents,
-        quantity: z.number().int().positive().optional(),
-      }),
-    )
-    .min(1),
-  totalCents: cents,
-  status: z.enum(CHECKOUT_STATUSES),
-  /** Stripe Checkout handoff target (production; mocks fake it). */
-  checkoutUrl: z.url().optional(),
-  /** e.g. "Stripe Checkout — payments are processed securely." */
-  finePrint: z.string().optional(),
-});
-export type CheckoutCardProps = z.infer<typeof checkoutCardProps>;
-
-/**
- * Self-service cancel card (guest spec §5.5): policy summary, Keep/Cancel
- * buttons, cancelled-state banner + refund message. Policy copy comes from
- * `units.cancellation_policy` (PLAN.md).
- */
-export const cancelReservationCardProps = z.strictObject({
-  bookingId: entityId,
-  /** e.g. "Free cancellation until 5 days before check-in…" */
-  policySummary: z.string().min(1),
-  status: z.enum(CANCEL_RESERVATION_STATUSES),
-  refundAmountCents: cents.optional(),
-  /** Refund copy shown in the cancelled-state banner. */
-  refundMessage: z.string().optional(),
-});
-export type CancelReservationCardProps = z.infer<
-  typeof cancelReservationCardProps
 >;
 
 /**
@@ -448,10 +369,6 @@ export const catalogPropSchemas = {
   HouseRulesCard: houseRulesCardProps,
   GuestSessionCard: guestSessionCardProps,
   WorkOrderRequestConfirmation: workOrderRequestConfirmationProps,
-  AddonCatalogList: addonCatalogListProps,
-  AddonCard: addonCardProps,
-  CheckoutCard: checkoutCardProps,
-  CancelReservationCard: cancelReservationCardProps,
   BookingCalendar: bookingCalendarProps,
   BookingsIndexList: bookingsIndexListProps,
   // contractor
