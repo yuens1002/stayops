@@ -126,6 +126,8 @@ Three card sections, most recent first:
 
 ## 10. Deltas vs. PLAN.md
 
+> **Iteration-1 pivot 2026-07-23** — payments cut; bookings sync from third-party platforms (PLAN.md "Booking ingestion"). Consequences for this spec: §4's `update_booking` (extend/move dates, price delta) applies **only to `source=manual` bookings/leases** — synced bookings are read-only mirrors plus annotations (attach guest contact, record payout); `process_payment` remains but is bookkeeping only (marks a job approved+paid-externally, records the expense — it moves no money and keeps its confirm card); a new owner action issues the guest concierge link. Calendar/Jobs pages gain sync-sourced rows attributed to `system`. Agent session features (§3.2) are deferred with the chat-history planning pass — transcripts persist, no sessions/titling/expiring-confirm semantics in v1.
+>
 > **Reconciled 2026-07-22** — the schema/status/audit rows below have been applied to PLAN.md (`routine_series`/`routine_visits`, `needs_revision`, `public_inquiry` subject type, `party_size`/`pets`, `tool_invocations`). The table is kept as the rationale record. The session-model row remains open design work for `lib/agent/session.ts` (contract shape in trunk T1, implementation in track B4 — see PLAN.md "Build order").
 
 | This spec | PLAN.md today | Action |

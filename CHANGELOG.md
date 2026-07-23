@@ -4,6 +4,9 @@ All notable changes to this project are documented here. Format follows [Keep a 
 
 ## [Unreleased]
 
+### Changed
+- **Iteration-1 pivot** (2026-07-23, docs): payments/Stripe removed from v1 entirely; bookings now ingest from third-party platforms — per-unit iCal feeds (import-only, dates authority), Airbnb email enrichment via Gmail (guest details + payout), manual booking/lease creation; turnover work orders auto-create/cancel from sync events; add-on commerce and guest self-service cancel/date-change cut; agent chat-history/session features deferred to separate planning; guest concierge links owner-issued. T1 contract amendment (T1a) queued: `calendar_feeds`, bookings rework, commerce tables dropped, 4 catalog components removed.
+
 ### Added
 - **T1 contracts** (2026-07-22): full 21-table domain schema (Drizzle, pushed to Neon); A2UI protocol envelopes (`lib/a2ui/protocol.ts`) + 16-component Zod catalog (`lib/a2ui/catalog.ts`); upload contract types; 17 fixture envelopes; idempotent seed (`scripts/seed.ts`); vitest suite (43 tests). All 12 ACs verified via orca run (7 implement + 7 verify agents); catalog/protocol now FROZEN — changes require a contract PR.
 - **T0 verification** (2026-07-22): Clerk sign-in header on the landing page (`auth()`-branched, Clerk 7 pattern), `drizzle.config.ts` loads `.env.local` via `@next/env`; Neon `stayops` DB provisioned and `db:push` verified; Clerk modal render verified against the provisioned app (full sign-in session pending owner credentials).
